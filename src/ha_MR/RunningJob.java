@@ -19,6 +19,9 @@ public class RunningJob extends Job {
     this.setJobPort(jconf.getJobPort());
     
   }
+  public String checkPeriod(){
+    return null;
+  }
   
 
 }

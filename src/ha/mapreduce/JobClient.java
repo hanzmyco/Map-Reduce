@@ -1,9 +1,5 @@
 package ha.mapreduce;
 
-import java.net.InetSocketAddress;
-
-
-
 public class JobClient {
   public static RunningJob running;
   private JobConf jconf;
@@ -43,7 +39,7 @@ public class JobClient {
       *è®¡ç®—æ­¤jobçš„input split
       *å°†Jobè¿�è¡Œæ‰€éœ€çš„èµ„æº�æ‹·è´�åˆ°JobTrackerçš„æ–‡ä»¶ç³»ç»Ÿä¸­çš„æ–‡ä»¶å¤¹ä¸­ï¼ŒåŒ…æ‹¬job.jaræ–‡ä»¶ã€�job.xmlé…�ç½®æ–‡ä»¶ï¼Œinput splits
       *é€šçŸ¥JobTrackeræ­¤Jobå·²ç»�å�¯ä»¥è¿�è¡Œäº†
-      *æ��äº¤ä»»åŠ¡å�Žï¼ŒrunJobæ¯�éš�?ä¸€ç§’é’Ÿè½®è¯¢ä¸€æ¬¡jobçš„è¿›åº¦ï¼Œå°†è¿›åº¦è¿�?å›žåˆ°å‘½ä»¤è¡Œï¼Œç›´åˆ°ä»»åŠ¡è¿�è¡Œå®Œæ¯•ã€‚
+      *æ��äº¤ä»»åŠ¡å�Žï¼ŒrunJobæ¯�éš�?ä¸€ç§’é’Ÿè½®è¯¢ä¸€æ¬¡jobçš„è¿›åº¦ï¼Œå°†è¿›åº¦è¿�?å›žåˆ°å‘½ä»¤è¡Œï¼Œç›´åˆ°ä»»åŠ¡è¿�è¡Œå®Œæ¯•ã€‚
      */
     conf.setJobID(getRemoteID());
     /*
@@ -67,13 +63,14 @@ public class JobClient {
   }
   public static void main(String[] args) {
     // TODO Auto-generated method stub
-    String conf="configuration";
-    JobClient client=new JobClient(new JobConf(conf));
-    RunningJob rjob=client.runJob();
+	JobConf conf = new JobConf(args[0]);
+	System.out.println(conf);
+    JobClient client=new JobClient(conf);
+    /*RunningJob rjob=client.runJob();
     
     while(true){
       rjob.checkPeriod();
-    }
+    }*/
 
   }
 

@@ -1,4 +1,4 @@
-package ha_MR;
+package ha.mapreduce;
 
 
 public class JobConf extends Job{

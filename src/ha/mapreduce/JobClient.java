@@ -1,5 +1,9 @@
 package ha.mapreduce;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
 public class JobClient {
   public static RunningJob running;
 
@@ -30,7 +34,18 @@ public class JobClient {
     return null;
   }
 
-  private void uploadResources() {
+  /**
+   * @throws IOException 
+   * @throws InterruptedException 
+   * 
+   */
+  private void sendConf() throws IOException, InterruptedException {
+    Socket s = new Socket(jconf.getMaster().getAddress(), jconf.getMaster().getPort());
+    ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+    Thread.sleep(500);    
+    oos.writeObject(jconf);
+    oos.close();
+    s.close();
 
   }
 
@@ -51,8 +66,17 @@ public class JobClient {
     /*
      * get output configuration, compute input split
      */
-    uploadResources();
+    try {
+      sendConf();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
+    
     tellJobTracker();
 
     return new RunningJob(conf);
@@ -69,6 +93,7 @@ public class JobClient {
     JobConf conf = new JobConf(args[0]);
     System.out.println(conf);
     JobClient client = new JobClient(conf);
+    client.submitJob(conf);
     /*
      * RunningJob rjob=client.runJob();
      * 

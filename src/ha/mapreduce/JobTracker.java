@@ -34,7 +34,7 @@ public class JobTracker {
     
   }
 
-  private void listenForConnections() {
+  private void listenForJob() {
     try {
       Socket acceptedSocket = serverSocket.accept();
 
@@ -44,6 +44,8 @@ public class JobTracker {
       System.out.println(jf.getMaster().getAddress());      
       Thread.sleep(500);
       ois.close();
+      JobInProgress jp=new JobInProgress (jf);
+      jlist.add(jp);
       
     } catch (IOException e) {
       System.err.println("Error encountered while listening for client!");
@@ -55,6 +57,14 @@ public class JobTracker {
       System.err.println(e.getMessage());
     }
   }
+  private void launchJob(){
+    while(!jlist.isEmpty()){
+      JobInProgress jp=jlist.remove(0);
+      jp.runJob();
+    }
+  }
+  
+  
 
   public static void main(String[] args) {
     if (args.length != 1)
@@ -67,7 +77,7 @@ public class JobTracker {
         
         while (true)
         {
-            master.listenForConnections();
+            master.listenForJob();
         }
     }
     

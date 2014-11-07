@@ -49,9 +49,7 @@ public class JobClient {
 
   }
 
-  private void tellJobTracker() {
 
-  }
 
   private RunningJob submitJob(JobConf conf) {
     /**
@@ -77,7 +75,7 @@ public class JobClient {
     }
 
     
-    tellJobTracker();
+  
 
     return new RunningJob(conf);
 
@@ -93,12 +91,11 @@ public class JobClient {
     JobConf conf = new JobConf(args[0]);
     System.out.println(conf);
     JobClient client = new JobClient(conf);
-    client.submitJob(conf);
-    /*
-     * RunningJob rjob=client.runJob();
-     * 
-     * while(true){ rjob.checkPeriod(); }
-     */
+    RunningJob rjob=client.submitJob(conf);
+    
+      
+     while(true){ rjob.checkPeriod(); }
+     
 
   }
 

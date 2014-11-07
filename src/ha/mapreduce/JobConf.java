@@ -25,6 +25,14 @@ public class JobConf extends Job implements Serializable {
    */
   private Integer mappersPerSlave;
 
+  public Integer getMappersPerSlave() {
+    return mappersPerSlave;
+  }
+
+  public void setMappersPerSlave(Integer mappersPerSlave) {
+    this.mappersPerSlave = mappersPerSlave;
+  }
+
   public InetSocketAddress getMaster() {
     return master;
   }
@@ -45,6 +53,14 @@ public class JobConf extends Job implements Serializable {
    * Number of reducers running on each slave at one time
    */
   private Integer reducersPerSlave;
+
+  public Integer getReducersPerSlave() {
+    return reducersPerSlave;
+  }
+
+  public void setReducersPerSlave(Integer reducersPerSlave) {
+    this.reducersPerSlave = reducersPerSlave;
+  }
 
   /**
    * Which class the mapper is part of

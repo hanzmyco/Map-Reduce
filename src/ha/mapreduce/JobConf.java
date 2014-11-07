@@ -4,11 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JobConf extends Job {
+public class JobConf extends Job implements Serializable {
   /**
    * Master node that decides how to distribute tasks
    */
@@ -23,6 +24,22 @@ public class JobConf extends Job {
    * Number of mappers running on each slave at one time.
    */
   private Integer mappersPerSlave;
+
+  public InetSocketAddress getMaster() {
+    return master;
+  }
+
+  public void setMaster(InetSocketAddress master) {
+    this.master = master;
+  }
+
+  public List<InetSocketAddress> getSlaves() {
+    return slaves;
+  }
+
+  public void setSlaves(List<InetSocketAddress> slaves) {
+    this.slaves = slaves;
+  }
 
   /**
    * Number of reducers running on each slave at one time

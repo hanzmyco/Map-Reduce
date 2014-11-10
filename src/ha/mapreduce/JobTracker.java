@@ -11,7 +11,7 @@ import java.util.List;
 
 
 /**
- * https://github.com/michaelzhhan1990/hadoop-mapreduce/blob/HDFS-641/src/java/org/apache/hadoop/
+ *
  * mapred/JobTracker.java
  * 
  * @author hanz

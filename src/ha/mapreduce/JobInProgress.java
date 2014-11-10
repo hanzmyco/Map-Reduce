@@ -12,6 +12,7 @@ public class JobInProgress {
     List<InetSocketAddress> slaveList=jc.getSlaves();
     int mapperNum=slaveList.size()*jc.getMappersPerSlave();
     int reduceNum=slaveList.size()*jc.getReducersPerSlave();
+    
     // generate the number of TaskTracker the task track will launch mapper task and reducer task
     
     

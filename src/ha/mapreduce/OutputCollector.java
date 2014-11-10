@@ -28,12 +28,13 @@ public class OutputCollector {
   public void setOutputFile(String outputFile) {
     this.outputFile = outputFile;
   }
-  public void write2Master(){
+  
+  public void write2Master() throws IOException, InterruptedException {
     Socket s = new Socket(master.getAddress(), master.getPort());
     BufferedWriter oos = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
     
     Thread.sleep(500);    
-    oos.write();
+    oos.write("h");
     oos.close();
     s.close();
     

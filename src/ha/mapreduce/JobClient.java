@@ -15,15 +15,6 @@ public class JobClient {
 
   public JobClient(JobConf conf) {
     this.jconf = conf;
-
-  }
-
-  @Deprecated
-  public static RunningJob runJob(JobConf job) {
-    JobClient jc = new JobClient(job);
-    running = jc.submitJob(job);
-    return null;
-
   }
 
   public RunningJob runJob() {
@@ -35,68 +26,71 @@ public class JobClient {
   }
 
   /**
-   * @throws IOException 
-   * @throws InterruptedException 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
    * 
    */
-  private void sendConf() throws IOException, InterruptedException {
-    Socket s = new Socket(jconf.getMaster().getAddress(), jconf.getMaster().getPort());
+  private void sendConf() throws IOException, InterruptedException, ClassNotFoundException {
+    String masterAddress = jconf.getMaster().getHostName();
+    Integer masterPort = jconf.getMaster().getPort();
+    System.out.println("[CLIENT] Connecting to master at " + masterAddress + ":" + masterPort
+            + "...");
+    Socket s = new Socket(masterAddress, masterPort);
     ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-    Thread.sleep(500);    
+
     oos.writeObject(jconf);
+
+    Thread.sleep(500);
     oos.close();
     s.close();
-
   }
 
-
-
+  /**
+   * Send job over to master node and listen for
+   */
   private RunningJob submitJob(JobConf conf) {
-    /**
-     * å�‘JobTrackerè¯·æ±‚ä¸€ä¸ªæ–°çš„job ID æ£€æµ‹æ­¤jobçš„outputé…�ç½® è®¡ç®—æ­¤jobçš„input split
-     * å°†Jobè¿�è¡Œæ‰€éœ€çš„èµ„æº�æ‹·è´�åˆ°JobTrackerçš„æ–‡ä»¶ç³»ç»Ÿä¸­çš„æ–‡ä»¶å¤¹ä¸­ï¼ŒåŒ…æ‹¬job.
-     * jaræ–‡ä»¶ã€�job.xmlé…�ç½®æ–‡ä»¶ï¼Œinput splits é€šçŸ¥JobTrackeræ­¤Jobå·²ç»�å�¯ä»¥è¿�è¡Œäº†
-     * æ��
-     * äº¤ä»»åŠ¡å�Žï¼ŒrunJobæ¯�éš�?ä¸€ç§’é’Ÿè½®è¯¢ä¸€æ¬¡jobçš„è¿›åº¦ï¼Œå°†è¿›åº¦è¿�?å›žåˆ°å‘½ä»¤è¡
-     * Œï¼Œç›´åˆ°ä»»åŠ¡è¿�è¡Œå®Œæ¯•ã€‚
-     */
     conf.setJobID(getRemoteID());
     /*
      * get output configuration, compute input split
      */
     try {
       sendConf();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
-    
-  
-
     return new RunningJob(conf);
-
   }
 
-  RunningJob submitJob(String jobFile) {
-    return null;
-
+  private void getUpdates() {
+    while (true) {
+      // poll for job status
+    }
   }
 
   public static void main(String[] args) {
-    // TODO Auto-generated method stub
+    if (args.length != 1) {
+      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file>");
+      System.exit(0);
+    }
+
     JobConf conf = new JobConf(args[0]);
+    System.out.println("[CLIENT] Setting up new job as such:");
     System.out.println(conf);
     JobClient client = new JobClient(conf);
-    RunningJob rjob=client.submitJob(conf);
-    
-      
-     while(true){ rjob.checkPeriod(); }
-     
-
+    try {
+      client.sendConf();
+    } catch (Exception e) {
+      System.err.println("Could not send job conf over to master.");
+      e.printStackTrace();
+    }
+    System.out.println("Sent job conf to master. Now listening for updates.");
+    client.getUpdates();
+    /*
+     * while (true) { rjob.checkPeriod(); }
+     */
   }
 
 }

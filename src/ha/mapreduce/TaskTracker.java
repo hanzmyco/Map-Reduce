@@ -19,6 +19,7 @@ public class TaskTracker {
   }
 
   public void startTask(Integer count, Class<Task> taskClass) throws IOException, InstantiationException, IllegalAccessException {
+    System.out.println("[TASK TRACKER] Received request to start " + count + " classes of type " + taskClass);
     for (int i = 0; i < count ; i++) {
       TaskInProgress tp = new TaskInProgress(taskClass.newInstance());
       tasks.add(tp);

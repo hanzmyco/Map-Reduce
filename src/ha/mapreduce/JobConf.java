@@ -93,6 +93,16 @@ public class JobConf extends Job implements Serializable {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public Class<Mapper> getMapperClass() {
+    return mapperClass;
+  }
+
+  @SuppressWarnings("unchecked")
+  public Class<Reducer> getReducerClass() {
+    return reducerClass;
+  }
+
   /**
    * Get the key of a string key-value pair
    */

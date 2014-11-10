@@ -1,5 +1,9 @@
 package ha.mapreduce;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * it handle one machine, how many mapper(map tasks), how many reducer tasks
  * it will construct the TaskInProgress
@@ -8,10 +12,16 @@ package ha.mapreduce;
  *
  */
 public class TaskTracker {
-  private int mapperNum; //how many mapper in the node
-  private int reducerNum; //how many reducer in the node
-  private Class mapperClass;
-  private Class reducerClass;
+  private List<TaskInProgress> tasks;
 
+  public TaskTracker() {
+    tasks = new ArrayList<TaskInProgress>();
+  }
 
+  public void startTask(Integer count, Class<Task> taskClass) throws IOException, InstantiationException, IllegalAccessException {
+    TaskInProgress tp = new TaskInProgress(taskClass.newInstance());
+    tasks.add(tp);
+    
+    new Thread(tp).start();
+  }
 }

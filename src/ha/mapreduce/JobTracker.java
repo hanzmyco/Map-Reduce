@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Master node
  */
-public class JobTracker implements Runnable {
+public class JobTracker {
   private List<JobInProgress> jobs;
 
   public JobTracker() {
@@ -18,10 +18,5 @@ public class JobTracker implements Runnable {
     JobInProgress jp = new JobInProgress(jf);
     jobs.add(jp);
     new Thread(jp).start();
-  }
-
-  @Override
-  public void run() {
-    // monitor slave nodes for failure
   }
 }

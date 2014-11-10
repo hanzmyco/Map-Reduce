@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Master {
+public class Master {  
   public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException {
     if (args.length != 1) {
       System.out.println("USAGE: java ha.mapreduce.Master <port>");
@@ -16,7 +16,6 @@ public class Master {
       
       
       JobTracker jobTracker = new JobTracker();
-      new Thread(jobTracker).start();
 
       while (true) {
         System.out.println("[MASTER] Waiting for new job on port " + args[0] + "...");

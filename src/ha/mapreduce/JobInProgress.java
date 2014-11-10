@@ -30,7 +30,23 @@ public class JobInProgress implements Runnable {
         
         Thread.sleep(1000);
         
-        System.out.println("[JOB-IN-PROGRESS] Sent " + jc.getMappersPerSlave() + " mappers of class " + jc.getMapperClass() + " over to slave.");
+        System.out.println("[JOB-IN-PROGRESS] Sent " + jc.getMappersPerSlave() + " mappers of " + jc.getMapperClass() + " over to slave.");
+        
+        oos.close();
+        slaveSocket.close();
+        
+        // Check that map tasks have finished first
+        
+        slaveSocket = new Socket(slave.getAddress(), slave.getPort());
+        oos = new ObjectOutputStream(slaveSocket.getOutputStream());
+        
+        oos.writeObject(jc.getReducersPerSlave());
+        oos.writeObject(jc.getReducerClass());
+        
+        Thread.sleep(1000);
+        
+        System.out.println("[JOB-IN-PROGRESS] Sent " + jc.getReducersPerSlave() + " reducers of " + jc.getReducerClass() + " over to slave.");
+        
         oos.close();
         slaveSocket.close();
       } catch (IOException e) {

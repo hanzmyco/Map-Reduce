@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Master {  
-  public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException {
+  public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException, InterruptedException {
     if (args.length != 1) {
       System.out.println("USAGE: java ha.mapreduce.Master <port>");
     } else {

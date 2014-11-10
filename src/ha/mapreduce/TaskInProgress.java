@@ -8,7 +8,7 @@ public class TaskInProgress implements Runnable {
   public TaskInProgress(Task task) throws IOException {
     this.task=task;
     
-    System.out.println("[TASK] Received new task of class " + task.getClass());
+    System.out.println("[TASK] Received new task of " + task.getClass());
   }
   
   @Override

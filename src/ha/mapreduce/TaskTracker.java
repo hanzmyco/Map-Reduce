@@ -19,9 +19,11 @@ public class TaskTracker {
   }
 
   public void startTask(Integer count, Class<Task> taskClass) throws IOException, InstantiationException, IllegalAccessException {
-    TaskInProgress tp = new TaskInProgress(taskClass.newInstance());
-    tasks.add(tp);
-    
-    new Thread(tp).start();
+    for (int i = 0; i < count ; i++) {
+      TaskInProgress tp = new TaskInProgress(taskClass.newInstance());
+      tasks.add(tp);
+      
+      new Thread(tp).start();
+    }
   }
 }

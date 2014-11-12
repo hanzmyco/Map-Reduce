@@ -19,7 +19,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class Master {  
   public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException, InterruptedException, AlreadyBoundException {
-    if (args.length != 1) {
+    if (args.length != 2) {
       System.out.println("USAGE: java ha.mapreduce.Master <port>");
     } else {
       @SuppressWarnings("resource")
@@ -27,10 +27,8 @@ public class Master {
       
       Master m=new Master();
       JobTracker jobTracker = new JobTracker();
-      //JobTrackerInterface jobTracker=new JobTracker();
-      //JobTracker jobTracker = new JobTracker();
       JobTrackerInterface jt=(JobTrackerInterface)UnicastRemoteObject.exportObject(jobTracker, 0);
-      Registry registry = LocateRegistry.createRegistry(1111);
+      Registry registry = LocateRegistry.createRegistry(Integer.parseInt(args[1]));
       registry.bind("Hello", jt);
       
       
@@ -42,7 +40,12 @@ public class Master {
         
         System.out.println("[MASTER] Got job configuration, starting a new job with it...");
         JobConf jc = (JobConf) newJobsStream.readObject();
-        jobTracker.startJob(jc);
+        int JobID=jobTracker.startJob(jc);
+        
+        ObjectOutputStream oos = new ObjectOutputStream(jobsSocket.getOutputStream());
+        oos.write(JobID);
+        
+        
         
         try {
           Thread.sleep(1000);
@@ -53,6 +56,7 @@ public class Master {
         
         newJobsStream.close();
         jobsSocket.close();
+        oos.close();
       }
     }
   }

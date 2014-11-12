@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -15,10 +16,6 @@ public class JobClient {
 
   public JobClient(JobConf conf) {
     this.jconf = conf;
-  }
-
-  private String getRemoteID() {
-    return null;
   }
 
   /**
@@ -34,10 +31,16 @@ public class JobClient {
             + "...");
     Socket s = new Socket(masterAddress, masterPort);
     ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-
     oos.writeObject(jconf);
+    
+    ObjectInputStream newJobsStream = new ObjectInputStream(s.getInputStream());
+    
+    System.out.println("[MASTER] Got job id");
+    JobID = (int) newJobsStream.readObject();
+    
 
     Thread.sleep(500);
+    newJobsStream.close();
     oos.close();
     s.close();
   }
@@ -46,7 +49,7 @@ public class JobClient {
    * Send job over to master node and listen for
    */
   private void submitJob(JobConf conf) {
-    conf.setJobID(getRemoteID());
+    
     /*
      * get output configuration, compute input split
      */
@@ -57,18 +60,12 @@ public class JobClient {
       e.printStackTrace();
     }
 
-    JobID = getJobID();
-
-  }
-
-  private int getJobID() {
-    return 0;
   }
 
   private void getUpdates(JobTrackerInterface jt) throws RemoteException {
     while (true) {
       // poll for job status
-      System.out.println(jt.updateInformation(1));
+      System.out.println(jt.updateInformation(JobID));
     }
   }
 
@@ -97,6 +94,7 @@ public class JobClient {
       JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("Hello");
       System.out.print("about to update");
       client.getUpdates(stub);
+      
     } catch (Exception e) {
       System.err.println("Client exception: " + e.toString());
       e.printStackTrace();

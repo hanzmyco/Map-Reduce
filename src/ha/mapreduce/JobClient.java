@@ -1,24 +1,20 @@
 package ha.mapreduce;
 
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class JobClient {
-  public static RunningJob running;
 
   private JobConf jconf;
 
-  public JobClient() {
-
-  }
+  private int JobID;
 
   public JobClient(JobConf conf) {
     this.jconf = conf;
-  }
-
-  public RunningJob runJob() {
-    return submitJob(jconf);
   }
 
   private String getRemoteID() {
@@ -49,7 +45,7 @@ public class JobClient {
   /**
    * Send job over to master node and listen for
    */
-  private RunningJob submitJob(JobConf conf) {
+  private void submitJob(JobConf conf) {
     conf.setJobID(getRemoteID());
     /*
      * get output configuration, compute input split
@@ -57,22 +53,28 @@ public class JobClient {
     try {
       sendConf();
     } catch (Exception e) {
-      // TODO Auto-generated catch block
+      System.out.println("error in submitting job");
       e.printStackTrace();
     }
 
-    return new RunningJob(conf);
+    JobID = getJobID();
+
   }
 
-  private void getUpdates() {
+  private int getJobID() {
+    return 0;
+  }
+
+  private void getUpdates(JobTrackerInterface jt) throws RemoteException {
     while (true) {
       // poll for job status
+      System.out.println(jt.updateInformation(1));
     }
   }
 
   public static void main(String[] args) {
-    if (args.length != 1) {
-      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file>");
+    if (args.length != 2) {
+      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> <RMI port>");
       System.exit(0);
     }
 
@@ -81,16 +83,24 @@ public class JobClient {
     System.out.println(conf);
     JobClient client = new JobClient(conf);
     try {
-      client.sendConf();
+      client.submitJob(conf);
     } catch (Exception e) {
       System.err.println("Could not send job conf over to master.");
       e.printStackTrace();
     }
     System.out.println("Sent job conf to master. Now listening for updates.");
-    client.getUpdates();
-    /*
-     * while (true) { rjob.checkPeriod(); }
-     */
+
+    String port=args[1];
+    try {
+      
+      Registry registry = LocateRegistry.getRegistry(Integer.parseInt(port));
+      JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("Hello");
+      System.out.print("about to update");
+      client.getUpdates(stub);
+    } catch (Exception e) {
+      System.err.println("Client exception: " + e.toString());
+      e.printStackTrace();
+    }
   }
 
 }

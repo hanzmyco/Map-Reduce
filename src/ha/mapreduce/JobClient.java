@@ -31,13 +31,13 @@ public class JobClient {
             + "...");
     Socket s = new Socket(masterAddress, masterPort);
     ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-    oos.writeObject(jconf);
-    
     ObjectInputStream newJobsStream = new ObjectInputStream(s.getInputStream());
-    
-    System.out.println("[MASTER] Got job id");
-    JobID = (int) newJobsStream.readObject();
-    
+
+    System.out.println("[CLIENT] Submitting job config...");
+    oos.writeObject(jconf);
+
+    System.out.println("[CLIENT] Waiting for job id...");
+    JobID = newJobsStream.readInt();
 
     Thread.sleep(500);
     newJobsStream.close();
@@ -49,7 +49,7 @@ public class JobClient {
    * Send job over to master node and listen for
    */
   private void submitJob(JobConf conf) {
-    
+
     /*
      * get output configuration, compute input split
      */
@@ -66,6 +66,12 @@ public class JobClient {
     while (true) {
       // poll for job status
       System.out.println(jt.updateInformation(JobID));
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        System.err.println("[CLIENT] Cannot sleep thread!");
+        e.printStackTrace();
+      }
     }
   }
 
@@ -87,14 +93,14 @@ public class JobClient {
     }
     System.out.println("Sent job conf to master. Now listening for updates.");
 
-    String port=args[1];
+    String port = args[1];
     try {
-      
+
       Registry registry = LocateRegistry.getRegistry(Integer.parseInt(port));
       JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("Hello");
       System.out.print("about to update");
       client.getUpdates(stub);
-      
+
     } catch (Exception e) {
       System.err.println("Client exception: " + e.toString());
       e.printStackTrace();

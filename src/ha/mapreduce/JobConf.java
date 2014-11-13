@@ -24,6 +24,8 @@ public class JobConf extends Job implements Serializable {
    * Number of mappers running on each slave at one time.
    */
   private Integer mappersPerSlave;
+  
+  private String inputFile;
 
   public Integer getMappersPerSlave() {
     return mappersPerSlave;
@@ -142,7 +144,7 @@ public class JobConf extends Job implements Serializable {
       return null;
     }
   }
-
+  
   /**
    * Find the class with the given name
    */
@@ -183,6 +185,9 @@ public class JobConf extends Job implements Serializable {
           break;
         case "REDUCER":
           reducerClass = getClass(value);
+          break;
+        case "INPUT_FILE":
+          inputFile=value;
           break;
         default:
           System.err.println("Parameter \"" + getKey(line) + "\" unrecognized.");

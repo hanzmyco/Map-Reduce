@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class JobTracker  implements JobTrackerInterface{
   private HashMap<Integer,JobInProgress> jobs;
-  
+  int currentJob;
 
 
   public JobTracker() {
@@ -25,7 +25,7 @@ public class JobTracker  implements JobTrackerInterface{
     int len=jobs.size();
     jobs.put(len,jp);
     Thread.sleep(20000);
-    new Thread(jp).start();
+    //new Thread(jp).start();
     return len;
   }
   

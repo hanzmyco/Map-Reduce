@@ -96,7 +96,7 @@ public class TaskTracker implements Runnable {
       try {
         askForNewMapTasks();
         askForNewReduceTasks();
-        Thread.sleep(30000);
+        Thread.sleep(5000);
       } catch (RemoteException e) {
         System.err.println("[TASK TRACKER] Unable to ask for new tasks!");
         e.printStackTrace();

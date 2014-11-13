@@ -14,6 +14,11 @@ public class JobConf extends Job implements Serializable {
    * Master node that decides how to distribute tasks
    */
   private InetSocketAddress master;
+  
+  /**
+   * Where the RMI server is located
+   */
+  private InetSocketAddress rmiServer;
 
   /**
    * Slave nodes that complete tasks sent by master, and that update master on task status.
@@ -45,6 +50,10 @@ public class JobConf extends Job implements Serializable {
 
   public InetSocketAddress getMaster() {
     return master;
+  }
+  
+  public InetSocketAddress getRmiServer() {
+    return rmiServer;
   }
 
   public void setMaster(InetSocketAddress master) {
@@ -179,6 +188,9 @@ public class JobConf extends Job implements Serializable {
         case "MASTER":
           master = getInetSocketAddress(value);
           break;
+        case "RMI":
+          rmiServer = getInetSocketAddress(value);
+          break;
         case "PARTICIPANT":
           slaves.add(getInetSocketAddress(value));
           break;
@@ -212,6 +224,7 @@ public class JobConf extends Job implements Serializable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("Master node located at " + master + "\n");
+    sb.append("RMI registry at " + rmiServer + "\n");
     sb.append(slaves.size() + " slave nodes located at:\n");
     for (InetSocketAddress address : slaves) {
       sb.append("\t" + address + "\n");

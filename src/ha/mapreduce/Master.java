@@ -20,7 +20,7 @@ import java.rmi.server.UnicastRemoteObject;
 public class Master {  
   public static void main(String[] args) throws NumberFormatException, IOException, ClassNotFoundException, InterruptedException, AlreadyBoundException {
     if (args.length != 2) {
-      System.out.println("USAGE: java ha.mapreduce.Master <port>");
+      System.out.println("USAGE: java ha.mapreduce.Master <port> <RMI port>");
     } else {
       @SuppressWarnings("resource")
       ServerSocket newJobsSocket = new ServerSocket(Integer.parseInt(args[0]));

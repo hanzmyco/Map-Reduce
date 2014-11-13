@@ -12,17 +12,17 @@ import java.util.List;
  */
 
 public class JobTracker implements JobTrackerInterface {
-  private HashMap<Integer, JobInProgress> jobs;
+  private HashMap<Integer, JobInProgress> mapJobs;
 
-  int currentJob;
+  int currentMap;
 
   private HashMap<Integer, JobInProgress> reducejobs;
 
   int currentReduce;
 
   public JobTracker() {
-    jobs = new HashMap<Integer, JobInProgress>();
-    currentJob = 0;
+    mapJobs = new HashMap<Integer, JobInProgress>();
+    currentMap = 0;
     reducejobs = new HashMap<Integer, JobInProgress>();
     currentReduce = 0;
 
@@ -30,8 +30,8 @@ public class JobTracker implements JobTrackerInterface {
 
   public int startJob(JobConf jf) throws IOException, InterruptedException {
     JobInProgress jp = new JobInProgress(jf);
-    int len = jobs.size();
-    jobs.put(len, jp);
+    int len = mapJobs.size();
+    mapJobs.put(len, jp);
     int len1 = reducejobs.size();
     reducejobs.put(len1, jp);
 
@@ -50,26 +50,27 @@ public class JobTracker implements JobTrackerInterface {
   @Override
   public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
-    // TODO HANZ
     List<TaskConf> temp = new ArrayList<TaskConf>();
-    JobInProgress jp = jobs.get(currentJob);
+    JobInProgress jp = mapJobs.get(currentMap);
+    if (jp == null)
+      return temp;
     while (true) {
       while (tasksAvailable > 0 && jp.getNextSplit() <= jp.getInputSplit() * jp.getlineperSplit()) {
         @SuppressWarnings("unchecked")
         TaskConf tf = new TaskConf(jp.getJc().getInputFile(), jp.getNextSplit(), jp.getNextSplit()
                 + jp.getlineperSplit(), 0, 0, (Class<Task>) (Class) jp.getJc().getMapperClass(),
-                currentJob);
+                currentMap);
         tasksAvailable--;
         jp.setNextSplit(jp.getNextSplit() + jp.getlineperSplit());
 
       }
       // if current job is finished
       if (jp.getNextSplit() > jp.getInputSplit() * jp.getlineperSplit()){
-        currentJob++;
+        currentMap++;
       }
       // if still slave is still available
       if (tasksAvailable >0){
-        if(currentJob>=jobs.size()){
+        if(currentMap>=mapJobs.size()){
           break;
         }
         else

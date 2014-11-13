@@ -16,8 +16,8 @@ public class Slave {
 
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
     try {
-      Registry registry = LocateRegistry.getRegistry(thisMachine.getHostString(),
-              thisMachine.getPort());
+      Registry registry = LocateRegistry.getRegistry(conf.getRmiServer().getHostString(), conf
+              .getRmiServer().getPort());
       new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("Hello"),
               conf.getMappersPerSlave(), conf.getReducersPerSlave())).start();
     } catch (Exception e) {

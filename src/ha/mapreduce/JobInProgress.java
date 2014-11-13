@@ -10,11 +10,19 @@ import java.util.List;
 
 public class JobInProgress implements Runnable {
   private JobConf jc;
+  private int inputSplit;
+  
   public JobInProgress(JobConf jc) throws IOException {
     this.jc=jc;
     
     System.err.println("[JOB] Received new job conf as such:");
     System.err.println(jc);
+  }
+  
+  public int inputSplit(String filename){  
+    // check if the file exceeds a certain amoung of data
+    return 0;
+    
   }
   
   public void run() {    

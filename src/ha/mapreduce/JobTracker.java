@@ -34,9 +34,6 @@ public class JobTracker implements JobTrackerInterface {
     mapJobs.put(len, jp);
     int len1 = reducejobs.size();
     reducejobs.put(len1, jp);
-
-    // Thread.sleep(20000);
-    // new Thread(jp).start();
     return len;
   }
 
@@ -76,6 +73,9 @@ public class JobTracker implements JobTrackerInterface {
         else
           continue;
       }
+      else
+        break;
+     
       
     }
 

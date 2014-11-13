@@ -27,6 +27,14 @@ public class JobConf extends Job implements Serializable {
   
   private String inputFile;
 
+  public String getInputFile() {
+    return inputFile;
+  }
+
+  public void setInputFile(String inputFile) {
+    this.inputFile = inputFile;
+  }
+
   public Integer getMappersPerSlave() {
     return mappersPerSlave;
   }

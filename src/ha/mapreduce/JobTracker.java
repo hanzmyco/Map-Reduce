@@ -43,7 +43,7 @@ public class JobTracker implements JobTrackerInterface {
 
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
@@ -53,30 +53,26 @@ public class JobTracker implements JobTrackerInterface {
       return temp;
     while (true) {
       while (tasksAvailable > 0 && jp.getNextSplit() <= jp.getInputSplit() * jp.getlineperSplit()) {
-        @SuppressWarnings("unchecked")
-        TaskConf tf = new TaskConf(jp.getJc().getInputFile(), jp.getNextSplit(), jp.getNextSplit()
+        temp.add(new TaskConf(jp.getJc().getInputFile(), jp.getNextSplit(), jp.getNextSplit()
                 + jp.getlineperSplit(), 0, 0, (Class<Task>) (Class) jp.getJc().getMapperClass(),
-                currentMap);
+                currentMap));
         tasksAvailable--;
         jp.setNextSplit(jp.getNextSplit() + jp.getlineperSplit());
 
       }
       // if current job is finished
-      if (jp.getNextSplit() > jp.getInputSplit() * jp.getlineperSplit()){
+      if (jp.getNextSplit() > jp.getInputSplit() * jp.getlineperSplit()) {
         currentMap++;
       }
       // if still slave is still available
-      if (tasksAvailable >0){
-        if(currentMap>=mapJobs.size()){
+      if (tasksAvailable > 0) {
+        if (currentMap >= mapJobs.size()) {
           break;
-        }
-        else
+        } else
           continue;
-      }
-      else
+      } else
         break;
-     
-      
+
     }
 
     return temp;

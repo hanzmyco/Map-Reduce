@@ -9,8 +9,10 @@ import java.util.List;
 /**
  * Master node
  */
-public class JobTracker implements JobTrackerInterface {
-  private HashMap<Integer, JobInProgress> jobs;
+
+public class JobTracker  implements JobTrackerInterface{
+  private HashMap<Integer,JobInProgress> jobs;
+  int currentJob;
 
   public JobTracker() {
     jobs = new HashMap<Integer, JobInProgress>();
@@ -21,7 +23,7 @@ public class JobTracker implements JobTrackerInterface {
     int len = jobs.size();
     jobs.put(len, jp);
     Thread.sleep(20000);
-    new Thread(jp).start();
+    //new Thread(jp).start();
     return len;
   }
 

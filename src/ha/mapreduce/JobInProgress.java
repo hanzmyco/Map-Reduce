@@ -11,6 +11,8 @@ import java.util.List;
 public class JobInProgress implements Runnable {
   private JobConf jc;
   private int inputSplit;
+  private int nextSplit;
+  private int lastline;
   
   public JobInProgress(JobConf jc) throws IOException {
     this.jc=jc;

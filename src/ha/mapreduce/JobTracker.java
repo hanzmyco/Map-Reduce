@@ -32,9 +32,14 @@ public class JobTracker implements JobTrackerInterface {
   }
 
   @Override
-  public List<TaskConf> getJobs(InetSocketAddress slave, int jobsAvailable) throws RemoteException {
+  public List<TaskConf> getMapTasks(InetSocketAddress slave, int jobsAvailable) throws RemoteException {
     // TODO HANZ
     return null;
   }
 
+  @Override
+  public List<TaskConf> getReduceTasks(InetSocketAddress slave, int jobsAvailable) throws RemoteException {
+    // TODO HANZ
+    return null;
+  }
 }

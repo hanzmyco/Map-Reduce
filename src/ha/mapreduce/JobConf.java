@@ -108,21 +108,21 @@ public class JobConf extends Job implements Serializable {
   /**
    * Get the key of a string key-value pair
    */
-  private String getKey(String pair, String delimiter) {
+  private static String getKey(String pair, String delimiter) {
     return pair.split(delimiter)[0];
   }
 
   /**
    * Get the key of a string key-value pair in the configuration file
    */
-  private String getKey(String pair) {
+  private static String getKey(String pair) {
     return getKey(pair, "=");
   }
 
   /**
    * Get the value of a string key-value pair
    */
-  private String getValue(String pair, String delimiter) {
+  private static String getValue(String pair, String delimiter) {
     return pair.split(delimiter)[1];
   }
 
@@ -136,7 +136,7 @@ public class JobConf extends Job implements Serializable {
   /**
    * Get an InetSocketAddress from a string of the format ADDRESS:PORT
    */
-  private InetSocketAddress getInetSocketAddress(String value) {
+  public static InetSocketAddress getInetSocketAddress(String value) {
     try {
       return new InetSocketAddress(getKey(value, ":"), Integer.parseInt(getValue(value, ":")));
     } catch (NumberFormatException e) {

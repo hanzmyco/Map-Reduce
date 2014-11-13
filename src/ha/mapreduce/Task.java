@@ -12,6 +12,7 @@ public abstract class Task {
   protected int recordCount;
   protected int keySize;
   protected int valueSize;
+  protected Integer jobID = null;
   
   public void setup(TaskConf tc) throws FileNotFoundException {
     isr = new InputStreamReader(new FileInputStream(tc.getFilename()));
@@ -19,8 +20,18 @@ public abstract class Task {
     this.recordCount = tc.getRecordCount();
     this.keySize = tc.getKeySize();
     this.valueSize = tc.getValueSize();
+    this.jobID = tc.getJobID();
     this.collector = new OutputCollector(tc.getFilename() + "_" + recordStart + ".map", keySize, valueSize);
   }
   
-  public abstract void process() throws IOException;
+  protected abstract void process() throws IOException;
+  
+  public void run() throws IOException {
+    process();
+    collector.write2Disk();
+  }
+  
+  public Integer getJobID() {
+    return jobID;
+  }
 }

@@ -1,43 +1,28 @@
 package ha.mapreduce;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class Slave {
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws NumberFormatException, IOException {
-    if (args.length != 1) {
-      System.out.println("USAGE: java ha.mapreduce.Slave <port>");
+    if (args.length != 2) {
+      System.out.println("USAGE: java ha.mapreduce.Slave <config file> <host>:<port>");
       System.exit(0);
     }
-    
-    @SuppressWarnings("resource")
-    ServerSocket newTasksSocket = new ServerSocket(Integer.parseInt(args[0]));
-    
-    TaskTracker taskTracker = new TaskTracker();
 
-    while (true) {
-      System.out.println("[SLAVE] Waiting for new task on port " + args[0] + "...");
-      Socket tasksSocket;
-      try {
-        tasksSocket = newTasksSocket.accept();
-        ObjectInputStream newTasksStream = new ObjectInputStream(tasksSocket.getInputStream());
-        
-        System.out.println("[SLAVE] Getting task information...");
-        taskTracker.startTask((Integer) newTasksStream.readObject(), (Class<Task>) newTasksStream.readObject());
-        
-        Thread.sleep(1000);
-        
-        newTasksStream.close();
-        tasksSocket.close();
-      } catch (IOException e1) {
-        System.err.println("Cannot accept new task!");
-        e1.printStackTrace();
-      } catch (Exception e1) {
-        e1.printStackTrace();
-      }
+    JobConf conf = new JobConf(args[0]);
+
+    InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
+    try {
+      Registry registry = LocateRegistry.getRegistry(thisMachine.getHostString(),
+              thisMachine.getPort());
+      new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("Hello"),
+              conf.getMappersPerSlave(), conf.getReducersPerSlave())).start();
+    } catch (Exception e) {
+      System.err.println("[SLAVE] Error getting stub for JobTracker " + e.toString());
+      e.printStackTrace();
     }
   }
 }

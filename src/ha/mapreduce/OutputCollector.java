@@ -1,24 +1,38 @@
 package ha.mapreduce;
 
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class OutputCollector {
-  private static BufferedWriter bw;
   private String outputFile;
-  private InetSocketAddress master;
-  public OutputCollector(String outputFile){
+  private int keySize, valueSize;
+  private SortedMap<String, List<String>> mappings;
+  
+  public OutputCollector(String outputFile, int keySize, int valueSize){
     this.setOutputFile(outputFile);
+    this.keySize = keySize;
+    this.valueSize = valueSize;
+    this.mappings = new TreeMap<String, List<String>>();
   }
   
-  public static void collect(String key, String value) throws IOException {
-    bw.write(key+value);
-    
-    
+  public void collect(String key, String value) throws IOException {
+    if (key.length() != keySize) {
+      System.err.println("Key \"" + key + "\" is not of size " + keySize + "!");
+    } else if (key.length() != keySize) {
+      System.err.println("Value \"" + value + "\" is not of size " + valueSize + "!");
+    } else {
+      if (!mappings.containsKey(key)) {
+        mappings.put(key, new ArrayList<String>());
+      }
+      mappings.get(key).add(value);
+    }
   }
 
   public String getOutputFile() {
@@ -29,16 +43,22 @@ public class OutputCollector {
     this.outputFile = outputFile;
   }
   
-  public void write2Master() throws IOException, InterruptedException {
-    Socket s = new Socket(master.getAddress(), master.getPort());
-    BufferedWriter oos = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+  public void write2Disk() throws IOException {
+    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile)));
     
-    Thread.sleep(500);    
-    oos.write("h");
-    oos.close();
-    s.close();
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      System.err.println("Can't sleep thread!");
+      e.printStackTrace();
+    }
     
+    for (Map.Entry<String, List<String>> mapping : mappings.entrySet()) {
+      for (String value : mapping.getValue()) {
+        bw.write(mapping.getKey() + value);
+      }
+    }
+    
+    bw.close();
   }
-  
-  
 }

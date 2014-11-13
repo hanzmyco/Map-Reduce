@@ -8,11 +8,45 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JobInProgress implements Runnable {
+public class JobInProgress {
   private JobConf jc;
-  private int inputSplit;
-  private int nextSplit;
-  private int lastline;
+  public JobConf getJc() {
+    return jc;
+  }
+
+  public void setJc(JobConf jc) {
+    this.jc = jc;
+  }
+
+  private int inputSplit;  //how many splits
+  private int nextSplit;   // coming split index, starts from 1,
+  private int lineperSplit;    //
+  
+  public int getInputSplit() {
+    return inputSplit;
+  }
+
+  public void setInputSplit(int inputSplit) {
+    this.inputSplit = inputSplit;
+  }
+
+  public int getNextSplit() {
+    return nextSplit;
+  }
+
+  public void setNextSplit(int nextSplit) {
+    this.nextSplit = nextSplit;
+  }
+
+  public int getlineperSplit() {
+    return lineperSplit;
+  }
+
+  public void setLastline(int lastline) {
+    this.lineperSplit = lastline;
+  }
+
+
   
   public JobInProgress(JobConf jc) throws IOException {
     this.jc=jc;
@@ -27,6 +61,7 @@ public class JobInProgress implements Runnable {
     
   }
   
+  /*
   public void run() {    
     // generate the number of TaskTracker the task track will launch mapper task and reducer task
     
@@ -67,7 +102,7 @@ public class JobInProgress implements Runnable {
         e.printStackTrace();
       }
     }
-  }
+  }*/
   
 
 }

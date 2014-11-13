@@ -86,6 +86,6 @@ public class JobTracker implements JobTrackerInterface {
   public List<TaskConf> getReduceTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
     // TODO HANZ
-    return null;
+    return new ArrayList<TaskConf>();
   }
 }

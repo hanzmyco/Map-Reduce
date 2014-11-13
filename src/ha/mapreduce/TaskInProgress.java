@@ -13,6 +13,11 @@ public class TaskInProgress implements Runnable {
   
   @Override
   public void run() {
-    // call task.process(...)
+    try {
+      task.process();
+    } catch (IOException e) {
+      System.err.println("[TASK] IO problems for task of " + task.getClass());
+      e.printStackTrace();
+    }
   }
 }

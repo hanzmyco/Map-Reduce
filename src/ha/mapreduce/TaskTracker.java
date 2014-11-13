@@ -1,6 +1,8 @@
 package ha.mapreduce;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class TaskTracker implements Runnable {
     }
     return statuses;
   }
-  
+
   private List<TaskInProgress> availableTasksInProgress(List<TaskInProgress> tasks) {
     List<TaskInProgress> availableTasks = new ArrayList<TaskInProgress>();
     for (TaskInProgress task : mapTasks) {
@@ -59,34 +61,49 @@ public class TaskTracker implements Runnable {
     return availableTasks;
   }
 
-  private void askForNewMapTasks() throws RemoteException {
-    List<TaskInProgress> availableTasks = availableTasksInProgress(mapTasks);
-    System.out.println("[TASK TRACKER] Asking for " + availableTasks.size() + " new map tasks");
-    for (TaskConf tc : jobTracker.getMapTasks(thisMachine, availableTasks.size())) {
-      Mapper newMapper;
+  @SuppressWarnings("unchecked")
+  private void askForNewTasks(List<TaskInProgress> existingJobs, String jobType, Method jobGetter)
+          throws RemoteException, IllegalAccessException, IllegalArgumentException,
+          InvocationTargetException {
+    List<TaskInProgress> availableTasks = availableTasksInProgress(existingJobs);
+    System.out.println("[TASK TRACKER] Asking for " + availableTasks.size() + " new " + jobType
+            + " tasks...");
+    int tasksReceived = 0;
+    if (jobTracker == null) System.err.println("arst");
+    if (thisMachine == null) System.err.println("brst");
+    if (jobGetter == null) System.err.println("crst");
+    for (TaskConf tc : (List<TaskConf>) jobGetter.invoke(jobTracker, thisMachine, availableTasks.size())) {
       try {
-        newMapper = (Mapper) tc.getTaskClass().newInstance();
-        availableTasks.get(0).setupNewTask(newMapper);
+        Task newTask = (Task) tc.getTaskClass().newInstance();
+        availableTasks.get(0).setupNewTask(newTask);
         availableTasks.remove(0);
+        tasksReceived++;
       } catch (Exception e) {
         System.err.println("[TASK TRACKER] Unable to create task #" + tc.getJobID());
         e.printStackTrace();
       }
     }
+    System.out.println("[TASK TRACKER] Received " + tasksReceived + " new " + jobType
+            + " tasks.");
   }
-  
+
+  private void askForNewMapTasks() throws RemoteException {
+    try {
+      askForNewTasks(mapTasks, "map", JobTrackerInterface.class.getMethod("getMapTasks",
+              InetSocketAddress.class, int.class));
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+            | NoSuchMethodException | SecurityException e) {
+      e.printStackTrace();
+    }
+  }
+
   private void askForNewReduceTasks() throws RemoteException {
-    List<TaskInProgress> availableTasks = availableTasksInProgress(reduceTasks);
-    System.out.println("[TASK TRACKER] Asking for " + availableTasks.size() + " new reduce tasks");
-    for (TaskConf tc : jobTracker.getMapTasks(thisMachine, availableTasks.size())) {
-      try {
-        Reducer newReducer = (Reducer) tc.getTaskClass().newInstance();
-        availableTasks.get(0).setupNewTask(newReducer);
-        availableTasks.remove(0);
-      } catch (Exception e) {
-        System.err.println("[TASK TRACKER] Unable to create task #" + tc.getJobID());
-        e.printStackTrace();
-      }
+    try {
+      askForNewTasks(reduceTasks, "reduce", JobTrackerInterface.class.getMethod("getReduceTasks",
+              InetSocketAddress.class, int.class));
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+            | NoSuchMethodException | SecurityException e) {
+      e.printStackTrace();
     }
   }
 

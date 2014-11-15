@@ -4,11 +4,11 @@ import java.io.IOException;
 
 public class TaskInProgress implements Runnable {
   private Task task;
-
   private Status status;
 
   public TaskInProgress() {
     status = Status.AVAILABLE;
+    
   }
 
   public void setupNewTask(Task task) {
@@ -24,12 +24,13 @@ public class TaskInProgress implements Runnable {
       status = Status.BUSY;
 
       try {
-        task.process();
+        task.process();  
+        
       } catch (IOException e) {
         System.err.println("[TASK] IO problems for task of " + task.getClass());
         e.printStackTrace();
       }
-
+      System.out.println(task.getCollector().getOutputFile().toString()+"finished");
       status = Status.AVAILABLE;
     }
   }

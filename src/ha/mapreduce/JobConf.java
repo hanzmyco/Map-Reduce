@@ -17,7 +17,15 @@ public class JobConf extends Job implements Serializable {
   
   private InetSocketAddress namenode;
   
- 
+  private int inputfile_len;
+
+  public int getInputfile_len() {
+    return inputfile_len;
+  }
+
+  public void setInputfile_len(int inputfile_len) {
+    this.inputfile_len = inputfile_len;
+  }
 
   /**
    * Where the RMI server is located
@@ -132,6 +140,7 @@ public class JobConf extends Job implements Serializable {
     reducersPerSlave = 1;
     mapperClass = null;
     reducerClass = null;
+    inputfile_len=0;
     
     try {
       parseConf(conf);
@@ -242,6 +251,10 @@ public class JobConf extends Job implements Serializable {
         case "DATANODE":
           datanodes.add(getInetSocketAddress(value));
           break;
+        case "INPUTFILE_LENTGH":
+          inputfile_len=Integer.parseInt(value);
+          break;
+          
         default:
           System.err.println("Parameter \"" + getKey(line) + "\" unrecognized.");
           break;

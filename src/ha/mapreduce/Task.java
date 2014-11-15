@@ -9,13 +9,22 @@ import java.io.InputStreamReader;
 
 public abstract class Task {
   protected InputStreamReader isr;
+  
   protected OutputCollector collector;
+  public OutputCollector getCollector() {
+    return collector;
+  }
+
+  public void setCollector(OutputCollector collector) {
+    this.collector = collector;
+  }
+
   protected int recordStart;
   protected int recordCount;
   protected int keySize;
   protected int valueSize;
   protected Integer jobID = null;
-  private MR_IO io;
+  
   
   public void setup(TaskConf tc) throws FileNotFoundException {
     isr = new InputStreamReader(new FileInputStream(tc.getFilename()));
@@ -25,6 +34,7 @@ public abstract class Task {
     this.valueSize = tc.getValueSize();
     this.jobID = tc.getJobID();
     this.collector = new OutputCollector(tc.getFilename() + "_" + recordStart + ".map", keySize, valueSize);
+    
   }
   
   protected abstract void process() throws IOException;

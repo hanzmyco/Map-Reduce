@@ -1,5 +1,9 @@
 package ha.IO;
 
+import ha.mapreduce.JobConf;
+import ha.mapreduce.JobTracker;
+import ha.mapreduce.JobTrackerInterface;
+
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.rmi.AlreadyBoundException;
@@ -82,5 +86,37 @@ public class NameNode implements NameNodeInterface {
   public void setStatusList(HashMap<Integer, Integer> statusList) {
     this.statusList = statusList;
   }
+  
+  public static void main(String []args) throws RemoteException, AlreadyBoundException{
+    JobConf dc = new JobConf(args[0]);
+   
+
+ 
+    Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
+    
+
+    // start namenode, bind it to rmi server
+    // set tup namenode
+    // InetSocketAddress namenode=jc.getNamenode();
+    NameNode namenode = new NameNode();
+    ArrayList<InetSocketAddress> ls = (ArrayList<InetSocketAddress>) dc.getDatanodes();
+    HashMap<Integer, InetSocketAddress> temp = new HashMap<Integer, InetSocketAddress>();
+    for (int i = 0; i < ls.size(); i++) {
+      temp.put(i, ls.get(i));
+
+    }
+    namenode.setNodeList(temp);
+    NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
+    registry.bind("NameNode", nf);
+    System.out.println("namenode ready");
+    
+  }
+  
+  
+  
+  
+  
+  
+  
   
 }

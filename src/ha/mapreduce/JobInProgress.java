@@ -64,8 +64,9 @@ public class JobInProgress {
   public JobInProgress(JobConf jc) throws IOException {
     this.jc = jc;
     taskMappings= new HashMap<Integer,Integer>();
-    setInputSplit(inputSplit(jc.getInputFile()));
     setlineperSplit(10);
+    setInputSplit(inputSplit(jc,lineperSplit));
+    
     setNextSplit(1);
     
     
@@ -73,9 +74,9 @@ public class JobInProgress {
     System.err.println(jc);
   }
 
-  public int inputSplit(String filename) {
+  public int inputSplit(JobConf jc,int lineperSplit) {
     // check if the file exceeds a certain amoung of data
-    return 5;
+    return (jc.getInputfile_len()/lineperSplit) +1;
 
   }
 

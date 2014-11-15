@@ -25,13 +25,17 @@ public class Slave {
       Registry registry = LocateRegistry.getRegistry(conf.getRmiServer().getHostString(), conf
               .getRmiServer().getPort());
       
+      // every datanode(slave) has a namenode stub 
+      NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
+      stub.loopupReplicaSlave(0, "fuck");
+      System.out.println("finished use namenode");
+      
+      
       new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("JobTracker"),
               conf.getMappersPerSlave(), conf.getReducersPerSlave())).start();
       
       
-      NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
-      stub.loopupReplicaSlave(0, "fuck");
-      System.out.println("finished use namenode");
+      
       
       
       

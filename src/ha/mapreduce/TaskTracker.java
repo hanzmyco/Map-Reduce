@@ -1,5 +1,7 @@
 package ha.mapreduce;
 
+import ha.IO.NameNodeInterface;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,6 +26,7 @@ public class TaskTracker implements Runnable {
   private JobTrackerInterface jobTracker;
 
   private InetSocketAddress thisMachine;
+  
 
   public TaskTracker(InetSocketAddress thisMachine, JobTrackerInterface jobTracker, int numMappers,
           int numReducers) {

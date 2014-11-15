@@ -17,5 +17,6 @@ public abstract class Mapper extends Task {
     collector.write2Disk();
     
     
+    
   }
 }

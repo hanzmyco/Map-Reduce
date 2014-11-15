@@ -1,5 +1,7 @@
 package ha.mapreduce;
 
+import ha.IO.MR_IO;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,6 +15,7 @@ public abstract class Task {
   protected int keySize;
   protected int valueSize;
   protected Integer jobID = null;
+  private MR_IO io;
   
   public void setup(TaskConf tc) throws FileNotFoundException {
     isr = new InputStreamReader(new FileInputStream(tc.getFilename()));
@@ -26,9 +29,11 @@ public abstract class Task {
   
   protected abstract void process() throws IOException;
   
+  @Deprecated
   public void run() throws IOException {
     process();
     collector.write2Disk();
+    
   }
   
   public Integer getJobID() {

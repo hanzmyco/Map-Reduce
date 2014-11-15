@@ -38,6 +38,8 @@ public class JobClient {
 
     System.out.println("[CLIENT] Waiting for job id...");
     JobID = newJobsStream.readInt();
+    System.out.print("JobID is:");
+    System.out.println(JobID);
 
     Thread.sleep(500);
     newJobsStream.close();
@@ -76,8 +78,8 @@ public class JobClient {
   }
 
   public static void main(String[] args) {
-    if (args.length != 2) {
-      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> <RMI port>");
+    if (args.length != 1) {
+      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> ");
       System.exit(0);
     }
 
@@ -93,12 +95,12 @@ public class JobClient {
     }
     System.out.println("Sent job conf to master. Now listening for updates.");
 
-    String port = args[1];
+    int port = conf.getRmiServer().getPort();
     try {
 
-      Registry registry = LocateRegistry.getRegistry(Integer.parseInt(port));
-      JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("Hello");
-      System.out.print("about to update");
+      Registry registry = LocateRegistry.getRegistry(port);
+      JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("JobTracker");
+      System.out.println("about to update");
       client.getUpdates(stub);
 
     } catch (Exception e) {

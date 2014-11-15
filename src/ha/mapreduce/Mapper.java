@@ -14,5 +14,8 @@ public abstract class Mapper extends Task {
       if (isr.read(value, offset, valueSize) == -1) break;
       map(new String(key), new String(value), collector);
     }
+    collector.write2Disk();
+    
+    
   }
 }

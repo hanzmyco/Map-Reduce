@@ -41,7 +41,7 @@ public class Master {
       // start namenode, bind it to rmi server
       // set tup namenode
       // InetSocketAddress namenode=jc.getNamenode();
-      NameNode namenode = new NameNode();
+      NameNode namenode = new NameNode(registry);
       ArrayList<InetSocketAddress> ls = (ArrayList<InetSocketAddress>) dc.getDatanodes();
       HashMap<Integer, InetSocketAddress> temp = new HashMap<Integer, InetSocketAddress>();
       for (int i = 0; i < ls.size(); i++) {

@@ -98,7 +98,7 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public Integer getFileSize(String filename) throws RemoteException {
+  public long getFileSize(String filename) throws RemoteException {
 
     return stubMap.get(filelocation.get(filename)).getFileSize(filename);
   }

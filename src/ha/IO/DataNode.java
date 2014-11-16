@@ -1,140 +1,71 @@
 package ha.IO;
 
-import ha.mapreduce.JobConf;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
-  private NameNodeInterface stub;
-
-  public DataNode(NameNodeInterface stub) {
-    this.stub = stub;
-  }
-  
-  public DataNode(){
-    
-  }
-
-  // write the local file to next node as replica
-  public void requestWriteReplica(String localfile) throws UnknownHostException, IOException {
-    InetSocketAddress remoteAddr = stub.loopupReplicaSlave(slaveID, localfile);
-    requestWriteReplica(remoteAddr, localfile);
-
-  }
-
-  // write to the addr, and filename, this can be use as write any file through network
-  public void requestWriteReplica(InetSocketAddress addr, String localfile)
-          throws UnknownHostException, IOException {
-    Socket s = new Socket(addr.getHostName(), addr.getPort());
-   
-    OutputStream o = s.getOutputStream();
-    BufferedWriter bufOut = new BufferedWriter( new OutputStreamWriter( o ) );
-    //write filename first
-    bufOut.write( localfile + ".rep" );
-    bufOut.newLine(); //
-    bufOut.flush();
-
-    BufferedReader br = new BufferedReader(new FileReader(localfile));
-    String line;
-
-    while ((line = br.readLine()) != null) {
-      bufOut.write(line);
-      bufOut.newLine();
-      bufOut.flush();
+  public DataNode(String myName, Registry registry) {
+    try {
+      registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
+      ((NameNodeInterface) registry.lookup("NameNode")).register(myName);
+    } catch (RemoteException | AlreadyBoundException | NotBoundException e) {
+      System.err.println("Cannot bind " + myName);
+      e.printStackTrace();
     }
+  }
+
+  public DataNode() {
 
   }
 
-  // write part of the file to desination , can be used by jobclient to write
-  public void requestWriteReplica(InetSocketAddress addr, String localfile,int begin_line, int end_line)
-          throws UnknownHostException, IOException {
-    Socket s = new Socket(addr.getHostName(), addr.getPort());
-    
-    OutputStream o = s.getOutputStream();
-    BufferedWriter bufOut = new BufferedWriter( new OutputStreamWriter( o ) );
-    //write filename first
-    bufOut.write( localfile + ".rep" );
-    bufOut.newLine(); //
-    bufOut.flush();
-    
-    
-   
-
-    BufferedReader br = new BufferedReader(new FileReader(localfile));
-    String line;
-    int index=1;
-
-    while ((line = br.readLine()) != null) {
-      if (index>=begin_line && index<=end_line){
-        bufOut.write(line);
-        bufOut.newLine();
-        bufOut.flush();
-      }
-      index++;
-    }
-
-  }
-
-  // in the slave side, accept and write the replica
-  public void acceptWriteReplica(int listen_Port) throws IOException {
-    ServerSocket server = new ServerSocket(listen_Port);
-    Socket s = server.accept();
-    InputStream in = s.getInputStream();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    String outputfile;
-    String line;
-    int num = 0;
-    BufferedWriter bw;
-    line = reader.readLine();
-
-    // line may be null
-    bw = new BufferedWriter(new FileWriter(new File(line)));
-
-    while ((line = reader.readLine()) != null) {
-
-      bw.write(line);
-      bw.newLine();
-      bw.flush();
-
-    }
-
-  }
   @Override
   public String read(String filename, int start, int end) throws RemoteException {
-    // TODO Auto-generated method stub
+    try {
+      FileReader fr = new FileReader(filename);
+      int length = end - start;
+      char[] characters = new char[length];
+      fr.read(characters, start, length);
+      fr.close();
+      return new String(characters);
+    } catch (IOException e) {
+      System.err.println("Can't read from local file " + filename);
+      e.printStackTrace();
+    }
     return null;
   }
+
   @Override
   public void write(String filename, String stuff) throws RemoteException {
-    // TODO Auto-generated method stub
-    
+    try {
+      FileWriter fw = new FileWriter(filename, true);
+      fw.append(stuff);
+      fw.close();
+    } catch (IOException e) {
+      System.err.println("Can't write to local file " + filename);
+      e.printStackTrace();
+    }
   }
+
   @Override
   public void open(String filename) throws RemoteException {
-    // TODO Auto-generated method stub
-    
+    try {
+      FileWriter fw = new FileWriter(filename);
+      fw.close();
+    } catch (IOException e) {
+      System.err.println("Can't open local file " + filename);
+      e.printStackTrace();
+    }
   }
+
   @Override
-  public Integer getFileSize(String filename) throws RemoteException {
-    // TODO Auto-generated method stub
-    return null;
+  public long getFileSize(String filename) throws RemoteException {
+    return new File(filename).length();
   }
-
-
-
 }

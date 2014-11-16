@@ -19,20 +19,14 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
-public class MR_IO  {
+public class DataNode implements DataNodeInterface {
   private NameNodeInterface stub;
 
-  private int slaveID;
-
-  private JobConf jc;
-
-  public MR_IO(NameNodeInterface stub, int slaveID, JobConf jc) {
+  public DataNode(NameNodeInterface stub) {
     this.stub = stub;
-    this.slaveID = slaveID;
-    this.jc = jc;
-
   }
-  public MR_IO(){
+  
+  public DataNode(){
     
   }
 
@@ -119,6 +113,26 @@ public class MR_IO  {
 
     }
 
+  }
+  @Override
+  public String read(String filename, int start, int end) throws RemoteException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  @Override
+  public void write(String filename, String stuff) throws RemoteException {
+    // TODO Auto-generated method stub
+    
+  }
+  @Override
+  public void open(String filename) throws RemoteException {
+    // TODO Auto-generated method stub
+    
+  }
+  @Override
+  public Integer getFileSize(String filename) throws RemoteException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 

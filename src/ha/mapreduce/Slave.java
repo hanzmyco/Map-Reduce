@@ -27,7 +27,7 @@ public class Slave {
       
       // every datanode(slave) has a namenode stub 
       NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
-      stub.loopupReplicaSlave(0, "fuck");
+      //stub.loopupReplicaSlave(0, "fuck");
       System.out.println("finished use namenode");
       
       

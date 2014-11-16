@@ -38,8 +38,8 @@ public class MR_IO  {
 
   // write the local file to next node as replica
   public void requestWriteReplica(String localfile) throws UnknownHostException, IOException {
-    InetSocketAddress remoteAddr = stub.loopupReplicaSlave(slaveID, localfile);
-    requestWriteReplica(remoteAddr, localfile);
+    //InetSocketAddress remoteAddr = stub.loopupReplicaSlave(slaveID, localfile);
+    //requestWriteReplica(remoteAddr, localfile);
 
   }
 

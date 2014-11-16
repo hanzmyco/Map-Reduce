@@ -48,7 +48,7 @@ public class Master {
         temp.put(i, ls.get(i));
 
       }
-      namenode.setNodeList(temp);
+      //namenode.setNodeList(temp);
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");

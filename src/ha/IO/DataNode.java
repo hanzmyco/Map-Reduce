@@ -11,10 +11,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
-  public DataNode(String myName, Registry registry) {
+  public DataNode(String myName, Registry registry, NameNodeInterface nameNode) {
     try {
       registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
-      ((NameNodeInterface) registry.lookup("NameNode")).register(myName);
+      nameNode.register(myName);
     } catch (RemoteException | AlreadyBoundException | NotBoundException e) {
       System.err.println("Cannot bind " + myName);
       e.printStackTrace();

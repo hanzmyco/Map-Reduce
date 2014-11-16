@@ -1,7 +1,5 @@
 package ha.mapreduce;
 
-import ha.IO.MR_IO;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;

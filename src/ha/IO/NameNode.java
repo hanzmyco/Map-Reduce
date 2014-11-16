@@ -28,18 +28,18 @@ public class NameNode implements NameNodeInterface {
   private HashMap<String, List<DataNodeInterface>> filelocations;
 
   // key is datanode id, value is slave status, 1 is alive, 0 is down
-  private HashMap<String, Integer> statusList;
+  private HashMap<DataNodeInterface, Integer> statusList;
 
-  private Registry r;
+  // private Registry r;
 
-  public NameNode(Registry r) {
-    this.r = r;
+  public NameNode(JobConf jc) {
+    // this.r = r;
 
     stubMap = new HashMap<String, DataNodeInterface>();
     filelocations = new HashMap<String, List<DataNodeInterface>>();
-    statusList = new HashMap<String, Integer>();
+    statusList = new HashMap<DataNodeInterface, Integer>();
   }
-  
+
   private void addToFileLocations(String filename, DataNodeInterface dataNode) {
     if (!filelocations.containsKey(filename)) {
       filelocations.put(filename, new ArrayList<DataNodeInterface>());
@@ -61,7 +61,7 @@ public class NameNode implements NameNodeInterface {
   public String read(String filename, int start, int end) throws RemoteException {
     return getStubFor(filename).read(filename, start, end);
   }
-  
+
   private void allocateDataNodes(String filename, int n) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
     // write to first two by default
@@ -93,14 +93,10 @@ public class NameNode implements NameNodeInterface {
     }
   }
 
+  // what if have existing file
   @Override
   public void put(String filename, String rmiName) throws RemoteException {
-    try {
-      addToFileLocations(filename, (DataNodeInterface) r.lookup(rmiName));
-    } catch (NotBoundException e) {
-      System.err.println("Can't put existing file " + filename);
-      e.printStackTrace();
-    }
+    addToFileLocations(filename, stubMap.get(rmiName));
   }
 
   @Override
@@ -109,7 +105,17 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public void register(String rmiName) throws RemoteException, NotBoundException {
-    stubMap.put(rmiName, (DataNodeInterface) r.lookup(rmiName));
+  public void register(JobConf jc) throws RemoteException, NotBoundException {
+
+    for (InetSocketAddress datanode_addr : jc.getDatanodes()) {
+      String rmiName = datanode_addr.toString()+" data node";
+      Registry registry = (Registry) LocateRegistry.getRegistry(datanode_addr.getHostString(),
+              datanode_addr.getPort());
+      DataNodeInterface newnode=(DataNodeInterface) registry.lookup(rmiName);
+      stubMap.put(rmiName, newnode);
+      statusList.put(newnode, 1);
+
+    }
+
   }
 }

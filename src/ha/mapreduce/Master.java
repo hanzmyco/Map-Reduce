@@ -41,7 +41,7 @@ public class Master {
       // start namenode, bind it to rmi server
       // set tup namenode
       // InetSocketAddress namenode=jc.getNamenode();
-      NameNode namenode = new NameNode(registry);
+      NameNode namenode = new NameNode(dc);
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");

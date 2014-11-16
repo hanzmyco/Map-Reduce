@@ -1,12 +1,14 @@
 package ha.mapreduce;
 
 import ha.IO.DataNode;
+import ha.IO.DataNodeInterface;
 import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class Slave {
   public static void main(String[] args) throws NumberFormatException, IOException {
@@ -25,7 +27,17 @@ public class Slave {
       // every datanode(slave) has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
-      new DataNode(thisMachine.toString() + " data node", registry, nameNode);
+      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
+      DataNode dn=new DataNode();
+      DataNodeInterface dni=(DataNodeInterface)UnicastRemoteObject.exportObject(dn, 0);
+      registry.bind(thisMachine.toString() + " data node", dni);
+      
+      
+      
+      
+      
+      
+      
 
       new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("JobTracker"),
               conf.getMappersPerSlave(), conf.getReducersPerSlave())).start();

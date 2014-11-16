@@ -12,7 +12,7 @@ import java.rmi.registry.Registry;
 public class Read {
   public static void main(String []args) throws NotBoundException, UnknownHostException, IOException{
     if (args.length != 1) {
-      System.out.println("USAGE: java ha.testing.IO.Read <conf file> ");
+      System.out.println("USAGE: java ha.testing.IO.Write <conf file> ");
       System.exit(0);
     }
 
@@ -27,12 +27,9 @@ public class Read {
     // every datanode(slave) has a namenode stub 
     NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
 
+    //stub.loopupReplicaSlave(0, "fuck");
+    System.out.println("finished use namenode");
 
-    stub.open("hello.txt");
-    stub.write("hello.txt", conf.toString());
-
+    System.out.println(stub.read("hello.txt", 5, 10));
   }
-  
-
-
 }

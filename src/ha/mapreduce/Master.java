@@ -46,8 +46,7 @@ public class Master {
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");
-      Thread.sleep(100000);
-      namenode.register();
+      
       
       
       

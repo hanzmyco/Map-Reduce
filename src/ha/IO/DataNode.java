@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -11,7 +12,15 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
-  public DataNode(String myName, NameNodeInterface nameNode) {
+
+  public DataNode(String myName, Registry registry,InetSocketAddress thisMachine, NameNodeInterface nameNode) {
+    try {
+      registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
+      nameNode.register(myName,thisMachine);
+    } catch (RemoteException | AlreadyBoundException | NotBoundException e) {
+      System.err.println("Cannot bind " + myName);
+      e.printStackTrace();
+    }
   }
 
   public DataNode() {

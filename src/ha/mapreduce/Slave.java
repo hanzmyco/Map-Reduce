@@ -22,11 +22,7 @@ public class Slave {
 
     try {
       
-      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
-      DataNode dn=new DataNode();
-      DataNodeInterface dni=(DataNodeInterface)UnicastRemoteObject.exportObject(dn, 0);
-      registry2.bind(thisMachine.toString() + " data node", dni);
-      System.out.println("finished datanode registry");
+      
       
       
       
@@ -37,7 +33,9 @@ public class Slave {
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
       
-   
+      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
+      DataNode dn=new DataNode(thisMachine.toString() + " data node",registry2,thisMachine,nameNode);
+      System.out.println("finished datanode registry");
       
       
       

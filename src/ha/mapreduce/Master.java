@@ -42,13 +42,6 @@ public class Master {
       // set tup namenode
       // InetSocketAddress namenode=jc.getNamenode();
       NameNode namenode = new NameNode(registry);
-      ArrayList<InetSocketAddress> ls = (ArrayList<InetSocketAddress>) dc.getDatanodes();
-      HashMap<Integer, InetSocketAddress> temp = new HashMap<Integer, InetSocketAddress>();
-      for (int i = 0; i < ls.size(); i++) {
-        temp.put(i, ls.get(i));
-
-      }
-      //namenode.setNodeList(temp);
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");

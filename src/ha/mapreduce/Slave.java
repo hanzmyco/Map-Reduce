@@ -2,6 +2,7 @@ package ha.mapreduce;
 
 import ha.IO.DataNode;
 import ha.IO.NameNodeInterface;
+import ha.IO.RegistryBinderInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,12 +20,13 @@ public class Slave {
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
 
     try {
-      Registry registry = LocateRegistry.getRegistry(conf.getRmiServer().getHostString(), conf
-              .getRmiServer().getPort());
+      RegistryBinderInterface registry = (RegistryBinderInterface) LocateRegistry.getRegistry(
+              conf.getRmiServer().getHostString(), conf.getRmiServer().getPort()).lookup(
+              "registry binder");
 
       // every datanode(slave) has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
-      
+
       new DataNode(thisMachine.toString() + " data node", registry, nameNode);
 
       new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("JobTracker"),

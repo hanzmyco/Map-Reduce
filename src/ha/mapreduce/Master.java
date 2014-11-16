@@ -2,6 +2,7 @@ package ha.mapreduce;
 
 import ha.IO.NameNode;
 import ha.IO.NameNodeInterface;
+import ha.IO.RegistryBinder;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -36,6 +37,7 @@ public class Master {
       JobTrackerInterface jt = (JobTrackerInterface) UnicastRemoteObject
               .exportObject(jobTracker, 0);
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
+      registry.bind("registry binder", new RegistryBinder(registry));
       registry.bind("JobTracker", jt);
 
       // start namenode, bind it to rmi server

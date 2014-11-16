@@ -18,8 +18,6 @@ public class Read {
     }
 
     JobConf conf = new JobConf(args[0]);
-    System.out.println("[CLIENT] Setting up new job as such:");
-    System.out.println(conf);
 
     Registry registry = LocateRegistry.getRegistry(conf.getRmiServer().getHostString(), conf
             .getRmiServer().getPort());
@@ -27,6 +25,6 @@ public class Read {
     // every datanode(slave) has a namenode stub
     NameNodeInterface stub = (NameNodeInterface) registry.lookup("NameNode");
     
-    System.out.println(stub.read("hello.txt", 5, 10));
+    System.out.println(stub.read("hello.txt", 4, 6));
   }
 }

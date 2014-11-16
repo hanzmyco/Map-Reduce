@@ -30,8 +30,10 @@ public class DataNode implements DataNodeInterface {
     try {
       FileReader fr = new FileReader(filename);
       int length = end - start;
+      System.out.println(length);
       char[] characters = new char[length];
-      fr.read(characters, start, length);
+      fr.skip(start);
+      fr.read(characters, 0, length);
       fr.close();
       return new String(characters);
     } catch (IOException e) {

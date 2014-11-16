@@ -11,7 +11,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
-  public DataNode(String myName, RegistryBinderInterface registry, NameNodeInterface nameNode) {
+  public DataNode(String myName, Registry registry, NameNodeInterface nameNode) {
     try {
       registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
       nameNode.register(myName);

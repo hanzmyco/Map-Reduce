@@ -5,17 +5,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
-  public DataNode(String myName, Registry registry) {
+  public DataNode(String myName, Registry registry, NameNodeInterface nameNode) {
     try {
       registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
-      ((NameNodeInterface) registry.lookup("NameNode")).register(myName);
-    } catch (RemoteException | AlreadyBoundException | NotBoundException e) {
+      nameNode.register(myName);
+    } catch (RemoteException | AlreadyBoundException e) {
       System.err.println("Cannot bind " + myName);
       e.printStackTrace();
     }

@@ -32,12 +32,21 @@ public class NameNode implements NameNodeInterface {
 
   // private Registry r;
 
-  public NameNode(JobConf jc) {
+  JobConf jc;
+  
+  
+  
+  public NameNode(JobConf jc) throws RemoteException, NotBoundException {
     // this.r = r;
 
     stubMap = new HashMap<String, DataNodeInterface>();
     filelocations = new HashMap<String, List<DataNodeInterface>>();
     statusList = new HashMap<DataNodeInterface, Integer>();
+    this.jc=jc;
+    
+    
+    
+    
   }
 
   private void addToFileLocations(String filename, DataNodeInterface dataNode) {
@@ -105,7 +114,7 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public void register(JobConf jc) throws RemoteException, NotBoundException {
+  public void register() throws RemoteException, NotBoundException {
 
     for (InetSocketAddress datanode_addr : jc.getDatanodes()) {
       String rmiName = datanode_addr.toString()+" data node";

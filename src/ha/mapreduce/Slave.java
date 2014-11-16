@@ -21,17 +21,23 @@ public class Slave {
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
 
     try {
+      
+      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
+      DataNode dn=new DataNode();
+      DataNodeInterface dni=(DataNodeInterface)UnicastRemoteObject.exportObject(dn, 0);
+      registry2.bind(thisMachine.toString() + " data node", dni);
+      System.out.println("finished datanode registry");
+      
+      
+      
       Registry registry = (Registry) LocateRegistry.getRegistry(
               conf.getRmiServer().getHostString(), conf.getRmiServer().getPort());
 
       // every datanode(slave) has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
-      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
-      DataNode dn=new DataNode();
-      DataNodeInterface dni=(DataNodeInterface)UnicastRemoteObject.exportObject(dn, 0);
-      registry.bind(thisMachine.toString() + " data node", dni);
       
+   
       
       
       

@@ -13,6 +13,7 @@ import java.net.SocketException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.HashMap;
 
 public class Master {
   public static void main(String[] args) throws NumberFormatException, IOException,
-          ClassNotFoundException, InterruptedException, AlreadyBoundException {
+          ClassNotFoundException, InterruptedException, AlreadyBoundException, NotBoundException {
     if (args.length != 1) {
       System.out.println("USAGE: java ha.mapreduce.Master <conf file> ");
       System.exit(0);
@@ -45,6 +46,12 @@ public class Master {
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");
+      Thread.sleep(100000);
+      namenode.register();
+      
+      
+      
+      
 
       while (true) {
         System.out.println("[MASTER] Waiting for new job on port " + "...");

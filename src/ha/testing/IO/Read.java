@@ -26,8 +26,11 @@ public class Read {
     
     // every datanode(slave) has a namenode stub 
     NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
+
+
     stub.open("hello.txt");
     stub.write("hello.txt", conf.toString());
+
   }
   
 

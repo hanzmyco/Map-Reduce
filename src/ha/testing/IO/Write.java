@@ -26,7 +26,10 @@ public class Write {
     
     // every datanode(slave) has a namenode stub 
     NameNodeInterface stub=(NameNodeInterface)registry.lookup("NameNode");
-    
+
+    //stub.loopupReplicaSlave(0, "fuck");
+    System.out.println("finished use namenode");
+
     System.out.println(stub.read("hello.txt", 5, 10));
   }
 }

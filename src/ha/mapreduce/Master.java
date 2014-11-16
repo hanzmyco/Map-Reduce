@@ -3,6 +3,7 @@ package ha.mapreduce;
 import ha.IO.NameNode;
 import ha.IO.NameNodeInterface;
 import ha.IO.RegistryBinder;
+import ha.IO.RegistryBinderInterface;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 public class Master {
   public static void main(String[] args) throws NumberFormatException, IOException,
           ClassNotFoundException, InterruptedException, AlreadyBoundException {
-    if (args.length !=1) {
+    if (args.length != 1) {
       System.out.println("USAGE: java ha.mapreduce.Master <conf file> ");
       System.exit(0);
 
@@ -37,7 +38,8 @@ public class Master {
       JobTrackerInterface jt = (JobTrackerInterface) UnicastRemoteObject
               .exportObject(jobTracker, 0);
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
-      registry.bind("registry binder", new RegistryBinder(registry));
+      registry.bind("registry binder", (RegistryBinderInterface) UnicastRemoteObject.exportObject(
+              new RegistryBinder(registry), 0));
       registry.bind("JobTracker", jt);
 
       // start namenode, bind it to rmi server

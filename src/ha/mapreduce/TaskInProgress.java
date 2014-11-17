@@ -27,7 +27,7 @@ public class TaskInProgress implements Runnable {
 
         try {
           task.process();
-
+          task = null;
         } catch (IOException e) {
           System.err.println("[TASK " + task.getJobID() + "] IO problems for task of "
                   + task.getClass());

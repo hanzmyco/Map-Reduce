@@ -13,9 +13,10 @@ public abstract class Reducer extends Task {
     byte[] key = new byte[taskConf.getKeySize()], value = new byte[taskConf.getValueSize()];
     String previousKey = "";
     List<String> values = new ArrayList<String>();
-    for (int offset = taskConf.getStart(); offset < taskConf.getEnd(); offset += taskConf.getRecordSize()) {
-      if (isr.read(key, offset, taskConf.getKeySize()) == -1) break;
-      if (isr.read(value, offset, taskConf.getValueSize()) == -1) break;
+    isr.skip(taskConf.getStart());
+    for (int i = 0; i < taskConf.getRecordCount(); i++) {
+      if (isr.read(key) == -1) break;
+      if (isr.read(value) == -1) break;
       String currentKey = new String(key), currentValue = new String(value);
       
       if (currentKey.equals(previousKey)) { // add to list of values to reduce

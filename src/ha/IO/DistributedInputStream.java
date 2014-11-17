@@ -18,13 +18,13 @@ public class DistributedInputStream extends InputStream {
 
   @Override
   public int read() throws IOException {
-    return nameNode.read(filename, position++, 1).charAt(0);
+    return nameNode.read(filename, position++, 1)[0];
   }
 
   @Override
   public int read(byte[] arg0) throws IOException {
-    System.arraycopy(nameNode.read(filename, position, arg0.length).toCharArray(), 0, arg0, 0,
-            arg0.length);
+    System.arraycopy(nameNode.read(filename, position, arg0.length), 0, arg0, 0, arg0.length);
+    position += arg0.length;
     return arg0.length;
   }
 

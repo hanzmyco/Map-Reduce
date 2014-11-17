@@ -1,6 +1,7 @@
 package ha.IO;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,14 +27,14 @@ public class DataNode implements DataNodeInterface {
   }
 
   @Override
-  public String read(String filename, long start, int length) throws RemoteException {
+  public byte[] read(String filename, long start, int length) throws RemoteException {
     try {
-      FileReader fr = new FileReader(filename);
-      char[] characters = new char[length];
+      FileInputStream fr = new FileInputStream(filename);
+      byte[] characters = new byte[length];
       fr.skip(start);
       fr.read(characters, 0, length);
       fr.close();
-      return new String(characters);
+      return characters;
     } catch (IOException e) {
       System.err.println("Can't read from local file " + filename);
       e.printStackTrace();
@@ -44,6 +45,7 @@ public class DataNode implements DataNodeInterface {
   @Override
   public void write(String filename, String stuff) throws RemoteException {
     try {
+      new File(filename).getParentFile().mkdirs();
       FileWriter fw = new FileWriter(filename, true);
       fw.append(stuff);
       fw.close();
@@ -56,6 +58,7 @@ public class DataNode implements DataNodeInterface {
   @Override
   public void open(String filename) throws RemoteException {
     try {
+      new File(filename).getParentFile().mkdirs();
       FileWriter fw = new FileWriter(filename);
       fw.close();
     } catch (IOException e) {

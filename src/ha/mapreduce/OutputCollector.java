@@ -3,6 +3,7 @@ package ha.mapreduce;
 import ha.IO.NameNodeInterface;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -53,6 +54,7 @@ public class OutputCollector {
   }
 
   public void write2Disk() throws IOException {
+    new File(outputFile).getParentFile().mkdirs();
     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile)));
 
     try {

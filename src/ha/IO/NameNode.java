@@ -52,7 +52,7 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public String read(String filename, long start, int length) throws RemoteException {
+  public byte[] read(String filename, long start, int length) throws RemoteException {
     return getStubFor(filename).read(filename, start, length);
   }
 

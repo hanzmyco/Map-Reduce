@@ -27,6 +27,10 @@ public class DistributedInputStream extends InputStream {
     position += arg0.length;
     return arg0.length;
   }
+  
+  public int read(byte[] key, byte[] value) throws IOException {
+    return read(key) + read(value);
+  }
 
   @Override
   public long skip(long n) {

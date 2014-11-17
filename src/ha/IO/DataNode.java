@@ -43,6 +43,16 @@ public class DataNode implements DataNodeInterface {
   }
 
   @Override
+  public void write(String filename, byte[] stuff) throws RemoteException {
+    try {
+      write(filename, new String(stuff));
+    } catch (IOException e) {
+      System.err.println("Can't write to local file " + filename);
+      e.printStackTrace();
+    }
+  }
+  
+  @Override
   public void write(String filename, String stuff) throws RemoteException {
     try {
       new File(filename).getParentFile().mkdirs();

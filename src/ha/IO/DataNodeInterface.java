@@ -7,6 +7,8 @@ public interface DataNodeInterface extends Remote {
   public byte[] read(String filename, long start, int length) throws RemoteException;
 
   public void write(String filename, String stuff) throws RemoteException;
+  
+  public void write(String filename, byte[] stuff) throws RemoteException;
 
   public void open(String filename) throws RemoteException;
 

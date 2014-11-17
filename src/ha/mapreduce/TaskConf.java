@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class TaskConf implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  private String filename;
+  private String inputFile;
 
   private int recordStart, recordCount, keySize, valueSize, jobID, taskID;
 
@@ -13,7 +13,7 @@ public class TaskConf implements Serializable {
 
   public TaskConf(String filename, int recordStart, int recordCount, int keySize, int valueSize,
           Class<Task> taskClass, int jobID, int taskID) {
-    this.filename = filename;
+    this.inputFile = filename;
     this.recordStart = recordStart;
     this.recordCount = recordCount;
     this.keySize = keySize;
@@ -23,8 +23,12 @@ public class TaskConf implements Serializable {
     this.taskID = taskID;
   }
 
-  public String getFilename() {
-    return filename;
+  public String getInputFilename() {
+    return inputFile;
+  }
+  
+  public String getOutputFilename() {
+    return getInputFilename() + "_" + getTaskID() + ".map";
   }
 
   public int getRecordStart() {

@@ -58,11 +58,15 @@ public class NameNode implements NameNodeInterface {
 
   private void allocateDataNodes(String filename, int n) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
-    int i = 0;
-    while (i < n) {
+    while (n > 0) {
+      if (!dnit.hasNext()) {
+        System.err.println("Not enough data nodes to allocate!");
+        break;
+      }
+      
       DataNodeInterface dni = dnit.next();
       if (writables.get(dni)) {
-        i++;
+        n--;
         addToFileLocations(filename, dni);
       }
     }

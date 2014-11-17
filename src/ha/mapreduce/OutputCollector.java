@@ -55,7 +55,7 @@ public class OutputCollector {
 
   public void write2Disk() throws IOException {
     new File(outputFile).getParentFile().mkdirs();
-    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile)));
+    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile + "local")));
 
     try {
       Thread.sleep(500);

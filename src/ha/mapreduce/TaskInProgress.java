@@ -27,7 +27,6 @@ public class TaskInProgress implements Runnable {
 
         try {
           task.process();
-          task = null;
         } catch (IOException e) {
           System.err.println("[TASK " + task.getJobID() + "] IO problems for task of "
                   + task.getClass());
@@ -36,6 +35,8 @@ public class TaskInProgress implements Runnable {
         System.out.println("[TASK " + task.getJobID() + "] Finished processing "
                 + task.getCollector().getOutputFile());
         status = Status.AVAILABLE;
+        
+        task = null;
       }
       
       try {
@@ -43,7 +44,6 @@ public class TaskInProgress implements Runnable {
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      //System.out.println("[TASK TRACKER] Still nothing");
     }
   }
 

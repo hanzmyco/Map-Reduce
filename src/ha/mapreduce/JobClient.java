@@ -72,7 +72,7 @@ public class JobClient {
   private void getUpdates(JobTrackerInterface jt) throws RemoteException {
     while (true) {
       // poll for job status
-      System.out.println(jt.updateInformation(JobID));
+      System.out.println(jt.getStatuses());
       try {
         Thread.sleep(5000);
       } catch (InterruptedException e) {

@@ -20,8 +20,8 @@ import java.util.Map;
  * @author hanz
  *
  */
-public class TaskTracker implements Runnable {
-  private List<TaskInProgress> mapTasks, reduceTasks;
+public class TaskTracker implements TaskTrackerInterface, Runnable {
+  private List<TaskInProgress> mappers, reducers;
   
   private NameNodeInterface nameNode;
 
@@ -32,34 +32,37 @@ public class TaskTracker implements Runnable {
 
   public TaskTracker(InetSocketAddress thisMachine, NameNodeInterface nameNode, JobTrackerInterface jobTracker, int numMappers,
           int numReducers) {
-    mapTasks = new ArrayList<TaskInProgress>();
-    reduceTasks = new ArrayList<TaskInProgress>();
+    mappers = new ArrayList<TaskInProgress>();
+    reducers = new ArrayList<TaskInProgress>();
     for (int i = 0; i < numMappers; i++) {
-      TaskInProgress tp = new TaskInProgress();
+      TaskInProgress tp = new TaskInProgress(i);
       new Thread(tp).start();
-      mapTasks.add(tp);
+      mappers.add(tp);
     }
     for (int i = 0; i < numReducers; i++) {
-      TaskInProgress tp = new TaskInProgress();
+      TaskInProgress tp = new TaskInProgress(i);
       new Thread(tp).start();
-      reduceTasks.add(tp);
+      reducers.add(tp);
     }
     this.nameNode = nameNode;
     this.jobTracker = jobTracker;
     this.thisMachine = thisMachine;
   }
 
-  public Map<Integer, Status> getTaskStatuses() {
-    Map<Integer, Status> statuses = new HashMap<Integer, Status>();
-    for (TaskInProgress task : mapTasks) {
-      statuses.put(task.getJobID(), task.getStatus());
+  public List<TaskStatus> getTaskStatuses() {
+    List<TaskStatus> statuses = new ArrayList<TaskStatus>();
+    for (TaskInProgress tip : mappers) {
+      statuses.add(new TaskStatus(tip, "Mapper"));
+    }
+    for (TaskInProgress tip : reducers) {
+      statuses.add(new TaskStatus(tip, "Reducer"));
     }
     return statuses;
   }
 
   private List<TaskInProgress> availableTasksInProgress(List<TaskInProgress> tasks) {
     List<TaskInProgress> availableTasks = new ArrayList<TaskInProgress>();
-    for (TaskInProgress task : mapTasks) {
+    for (TaskInProgress task : mappers) {
       if (task.getStatus() == Status.AVAILABLE) {
         availableTasks.add(task);
       }
@@ -96,7 +99,7 @@ public class TaskTracker implements Runnable {
 
   private void askForNewMapTasks() throws RemoteException {
     try {
-      askForNewTasks(mapTasks, "map", JobTrackerInterface.class.getMethod("getMapTasks",
+      askForNewTasks(mappers, "map", JobTrackerInterface.class.getMethod("getMapTasks",
               InetSocketAddress.class, int.class));
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
             | NoSuchMethodException | SecurityException e) {
@@ -106,7 +109,7 @@ public class TaskTracker implements Runnable {
 
   private void askForNewReduceTasks() throws RemoteException {
     try {
-      askForNewTasks(reduceTasks, "reduce", JobTrackerInterface.class.getMethod("getReduceTasks",
+      askForNewTasks(reducers, "reduce", JobTrackerInterface.class.getMethod("getReduceTasks",
               InetSocketAddress.class, int.class));
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
             | NoSuchMethodException | SecurityException e) {

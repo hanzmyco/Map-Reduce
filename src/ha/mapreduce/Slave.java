@@ -33,9 +33,12 @@ public class Slave {
       nameNode.register(dataNodeName, thisMachine, true);
       System.out.println("finished datanode registry");
 
-      new Thread(new TaskTracker(thisMachine, nameNode,
-              (JobTrackerInterface) registry.lookup("JobTracker"), conf.getMappersPerSlave(),
-              conf.getReducersPerSlave())).start();
+      JobTrackerInterface jt = (JobTrackerInterface) registry.lookup("JobTracker");
+      TaskTracker tt = new TaskTracker(thisMachine, nameNode, jt, conf.getMappersPerSlave(),
+              conf.getReducersPerSlave());
+      new Thread(tt).start();
+      registry2.bind("tt", (TaskTrackerInterface) UnicastRemoteObject.exportObject(tt, 0));
+      jt.registerAsSlave("tt", thisMachine);
     } catch (Exception e) {
       System.err.println("[SLAVE] Error getting stub for JobTracker " + e.toString());
       e.printStackTrace();

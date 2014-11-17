@@ -7,7 +7,12 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 public interface JobTrackerInterface extends Remote {
-  public String updateInformation(int JobID) throws RemoteException;
+  public String getStatuses() throws RemoteException;
+  
+  /**
+   * ALL SLAVES MUST REGISTER THEMSELVES AT THEIR LOCAL REGISTRY OFFICE
+   */
+  public void registerAsSlave(String rmiName, InetSocketAddress rmi_location) throws RemoteException;
 
   /**
    * A slave asks for a certain number of more tasks to do. A list of map tasks (up to

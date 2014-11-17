@@ -6,10 +6,12 @@ public class TaskInProgress implements Runnable {
   private Task task;
 
   private Status status;
+  
+  private int tipID;
 
-  public TaskInProgress() {
+  public TaskInProgress(int id) {
     status = Status.AVAILABLE;
-
+    tipID = id;
   }
 
   public void setupNewTask(Task task) {
@@ -17,6 +19,25 @@ public class TaskInProgress implements Runnable {
     status = Status.ASSIGNED;
 
     System.out.println("[TASK TRACKER] Received task " + task.getTaskID() + " of " + task.getClass() + " for job " + task.getJobID());
+  }
+  
+  public int getID() {
+    return tipID;
+  }
+  
+  /**
+   * @return the status
+   */
+  public Status getStatus() {
+    return status;
+  }
+
+  public Integer getJobID() {
+    return task.getJobID();
+  }
+  
+  public Task getTask() {
+    return task;
   }
 
   @Override
@@ -45,16 +66,5 @@ public class TaskInProgress implements Runnable {
         e.printStackTrace();
       }
     }
-  }
-
-  /**
-   * @return the status
-   */
-  public Status getStatus() {
-    return status;
-  }
-
-  public Integer getJobID() {
-    return task.getJobID();
   }
 }

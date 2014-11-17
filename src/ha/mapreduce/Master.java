@@ -6,18 +6,13 @@ import ha.IO.NameNodeInterface;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Master {
   public static void main(String[] args) throws NumberFormatException, IOException,
@@ -27,9 +22,9 @@ public class Master {
       System.exit(0);
 
     } else {
-      @SuppressWarnings("resource")
       // local default file
       JobConf dc = new JobConf(args[0]);
+      @SuppressWarnings("resource")
       ServerSocket newJobsSocket = new ServerSocket(dc.getMaster().getPort());
 
       // bind jobtracker to rmi server
@@ -46,11 +41,6 @@ public class Master {
       NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
       registry.bind("NameNode", nf);
       System.out.println("namenode ready");
-      
-      
-      
-      
-      
 
       while (true) {
         System.out.println("[MASTER] Waiting for new job on port " + "...");

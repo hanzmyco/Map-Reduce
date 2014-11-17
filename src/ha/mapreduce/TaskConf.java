@@ -1,25 +1,19 @@
 package ha.mapreduce;
 
-import ha.IO.NameNodeInterface;
-
 import java.io.Serializable;
 
 public class TaskConf implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  private String filename, rmiName;
-  
-  private NameNodeInterface nameNode;
+  private String filename;
 
   private int recordStart, recordCount, keySize, valueSize, jobID;
 
   private Class<Task> taskClass;
 
-  public TaskConf(String filename, String rmiName, NameNodeInterface nameNode, int recordStart, int recordCount, int keySize, int valueSize,
+  public TaskConf(String filename, int recordStart, int recordCount, int keySize, int valueSize,
           Class<Task> taskClass, int jobID) {
     this.filename = filename;
-    this.rmiName = rmiName;
-    this.nameNode = nameNode;
     this.recordStart = recordStart;
     this.recordCount = recordCount;
     this.keySize = keySize;
@@ -30,14 +24,6 @@ public class TaskConf implements Serializable {
 
   public String getFilename() {
     return filename;
-  }
-  
-  public String getRmiName() {
-    return rmiName;
-  }
-  
-  public NameNodeInterface getNameNode() {
-    return nameNode;
   }
 
   public int getRecordStart() {

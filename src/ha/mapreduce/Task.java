@@ -1,5 +1,6 @@
 package ha.mapreduce;
 
+import ha.IO.DistributedInputStream;
 import ha.IO.NameNodeInterface;
 
 import java.io.FileInputStream;
@@ -8,11 +9,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public abstract class Task {
-  protected NameNodeInterface nameNode;
-  
-  protected String filename;
+  protected DistributedInputStream isr;
 
   protected OutputCollector collector;
+
+  public OutputCollector getCollector() {
+    return collector;
+  }
+
+  public void setCollector(OutputCollector collector) {
+    this.collector = collector;
+  }
 
   protected int recordStart;
 
@@ -24,26 +31,19 @@ public abstract class Task {
 
   protected Integer jobID = null;
 
-  public void setup(TaskConf tc) throws FileNotFoundException {
-    this.nameNode = tc.getNameNode();
-    this.filename = tc.getFilename();
+  public void setup(TaskConf tc, NameNodeInterface nameNode) throws FileNotFoundException {
+    isr = new DistributedInputStream(tc.getFilename(), nameNode);
     this.recordStart = tc.getRecordStart();
     this.recordCount = tc.getRecordCount();
     this.keySize = tc.getKeySize();
     this.valueSize = tc.getValueSize();
     this.jobID = tc.getJobID();
-    this.collector = new OutputCollector(filename + "_" + jobID + ".map",
-            tc.getRmiName(), nameNode, keySize, valueSize);
+    this.collector = new OutputCollector(tc.getFilename() + "_" + tc.getJobID() + ".map", nameNode,
+            keySize, valueSize);
+
   }
 
   protected abstract void process() throws IOException;
-
-  @Deprecated
-  public void run() throws IOException {
-    process();
-    collector.write2Disk();
-
-  }
 
   public Integer getJobID() {
     return jobID;

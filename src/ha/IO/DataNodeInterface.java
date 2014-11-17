@@ -4,7 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface DataNodeInterface extends Remote {
-  public String read(String filename, int start, int end) throws RemoteException;
+  public String read(String filename, long start, int length) throws RemoteException;
 
   public void write(String filename, String stuff) throws RemoteException;
 

@@ -1,8 +1,12 @@
 package ha.mapreduce;
 
+import ha.IO.NameNodeInterface;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,18 +18,20 @@ import java.util.List;
 public class JobTracker implements JobTrackerInterface {
   private HashMap<Integer, JobInProgress> mapJobs;
 
-  int currentMap;
+  private int currentMap;
+
+  private InetSocketAddress nameNodeAddress;
 
   private HashMap<Integer, JobInProgress> reducejobs;
 
   int currentReduce;
 
-  public JobTracker() {
+  public JobTracker(InetSocketAddress nameNodeAddress) {
     mapJobs = new HashMap<Integer, JobInProgress>();
     currentMap = 0;
     reducejobs = new HashMap<Integer, JobInProgress>();
     currentReduce = 0;
-
+    this.nameNodeAddress = nameNodeAddress;
   }
 
   public int startJob(JobConf jf) throws IOException, InterruptedException {

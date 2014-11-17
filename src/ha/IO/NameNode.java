@@ -62,8 +62,8 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public String read(String filename, int start, int end) throws RemoteException {
-    return getStubFor(filename).read(filename, start, end);
+  public String read(String filename, long start, int length) throws RemoteException {
+    return getStubFor(filename).read(filename, start, length);
   }
 
   private void allocateDataNodes(String filename, int n) {

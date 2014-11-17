@@ -8,7 +8,7 @@ public abstract class Mapper extends Task {
   @Override
   public void process() throws IOException {
     int recordSize = this.keySize + this.valueSize;
-    char[] key = new char[keySize], value = new char[valueSize];
+    byte[] key = new byte[keySize], value = new byte[valueSize];
     for (int offset = recordStart * recordSize; offset < (recordStart + recordCount) * recordSize; offset += recordSize) {
       if (isr.read(key, offset, keySize) == -1) break;
       if (isr.read(value, offset, valueSize) == -1) break;

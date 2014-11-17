@@ -1,7 +1,5 @@
 package ha.IO;
 
-import ha.mapreduce.JobConf;
-
 import java.net.InetSocketAddress;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;

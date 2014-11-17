@@ -16,7 +16,7 @@ public class TaskInProgress implements Runnable {
     this.task = task;
     status = Status.ASSIGNED;
 
-    System.out.println("[TASK] Received new task of " + task.getClass());
+    System.out.println("[TASK " + task.getJobID() + "] Received new task of " + task.getClass());
   }
 
   @Override
@@ -28,10 +28,10 @@ public class TaskInProgress implements Runnable {
         task.process();
 
       } catch (IOException e) {
-        System.err.println("[TASK] IO problems for task of " + task.getClass());
+        System.err.println("[TASK " + task.getJobID() + "] IO problems for task of " + task.getClass());
         e.printStackTrace();
       }
-      System.out.println(task.filename + " finished");
+      System.out.println("[TASK " + task.getJobID() + "] Finished processing " + task.getCollector().getOutputFile());
       status = Status.AVAILABLE;
     }
   }

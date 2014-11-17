@@ -14,9 +14,9 @@ public class JobConf extends Job implements Serializable {
    * Master node that decides how to distribute tasks
    */
   private InetSocketAddress master;
-  
+
   private InetSocketAddress namenode;
-  
+
   private int inputfile_len;
 
   public int getInputfile_len() {
@@ -36,21 +36,21 @@ public class JobConf extends Job implements Serializable {
    * Slave nodes that complete tasks sent by master, and that update master on task status.
    */
   private List<InetSocketAddress> slaves;
-  
+
   private List<InetSocketAddress> datanodes;
 
   /**
    * Number of mappers running on each slave at one time.
    */
   private Integer mappersPerSlave;
-  
+
   private String inputFile;
-  
+
   /**
    * Number of reducers running on each slave at one time
    */
   private Integer reducersPerSlave;
-  
+
   public InetSocketAddress getNamenode() {
     return namenode;
   }
@@ -58,7 +58,7 @@ public class JobConf extends Job implements Serializable {
   public void setNamenode(InetSocketAddress namenode) {
     this.namenode = namenode;
   }
-  
+
   public List<InetSocketAddress> getDatanodes() {
     return datanodes;
   }
@@ -86,11 +86,11 @@ public class JobConf extends Job implements Serializable {
   public InetSocketAddress getMaster() {
     return master;
   }
-  
+
   public InetSocketAddress getRmiServer() {
     return rmiServer;
   }
-  
+
   public void setRmiServer(InetSocketAddress rmiServer) {
     this.rmiServer = rmiServer;
   }
@@ -132,16 +132,16 @@ public class JobConf extends Job implements Serializable {
    */
   public JobConf(String conf) {
     master = null;
-    namenode=null;
-    rmiServer=null;
+    namenode = null;
+    rmiServer = null;
     slaves = new ArrayList<InetSocketAddress>();
-    datanodes=new ArrayList<InetSocketAddress>();
+    datanodes = new ArrayList<InetSocketAddress>();
     mappersPerSlave = 1;
     reducersPerSlave = 1;
     mapperClass = null;
     reducerClass = null;
-    inputfile_len=0;
-    
+    inputfile_len = 0;
+
     try {
       parseConf(conf);
     } catch (IOException e) {
@@ -191,7 +191,7 @@ public class JobConf extends Job implements Serializable {
   /**
    * Get an InetSocketAddress from a string of the format ADDRESS:PORT
    */
-  
+
   public static InetSocketAddress getInetSocketAddress(String value) {
     try {
       return new InetSocketAddress(getKey(value, ":"), Integer.parseInt(getValue(value, ":")));
@@ -200,7 +200,7 @@ public class JobConf extends Job implements Serializable {
       return null;
     }
   }
-  
+
   /**
    * Find the class with the given name
    */
@@ -246,15 +246,14 @@ public class JobConf extends Job implements Serializable {
           reducerClass = getClass(value);
           break;
         case "INPUT_FILE":
-          inputFile=value;
+          inputFile = value;
           break;
         case "DATANODE":
           datanodes.add(getInetSocketAddress(value));
           break;
         case "INPUTFILE_LENTGH":
-          inputfile_len=Integer.parseInt(value);
+          inputfile_len = Integer.parseInt(value);
           break;
-          
         default:
           System.err.println("Parameter \"" + getKey(line) + "\" unrecognized.");
           break;
@@ -262,8 +261,6 @@ public class JobConf extends Job implements Serializable {
     }
     br.close();
   }
-
- 
 
   /**
    * Show configuration information

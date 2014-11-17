@@ -12,7 +12,7 @@ public abstract class Reducer extends Task {
   @Override
   public void process() throws IOException {
     int recordSize = this.keySize + this.valueSize;
-    char[] key = new char[keySize], value = new char[valueSize];
+    byte[] key = new byte[keySize], value = new byte[valueSize];
     String previousKey = "";
     List<String> values = new ArrayList<String>();
     for (int offset = recordStart * recordSize; offset < (recordStart + recordCount) * recordSize; offset += recordSize) {

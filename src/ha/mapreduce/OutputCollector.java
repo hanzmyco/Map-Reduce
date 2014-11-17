@@ -13,7 +13,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class OutputCollector {
-  private String outputFile, rmiName;
+  private String outputFile;
 
   private NameNodeInterface nameNode;
 
@@ -21,14 +21,13 @@ public class OutputCollector {
 
   private SortedMap<String, List<String>> mappings;
 
-  public OutputCollector(String outputFile, String rmiName, NameNodeInterface nameNode,
+  public OutputCollector(String outputFile, NameNodeInterface nameNode,
           int keySize, int valueSize) {
     this.setOutputFile(outputFile);
     this.keySize = keySize;
     this.valueSize = valueSize;
     this.mappings = new TreeMap<String, List<String>>();
     this.nameNode = nameNode;
-    this.rmiName = rmiName;
   }
 
   public void collect(String key, String value) throws IOException {
@@ -65,12 +64,11 @@ public class OutputCollector {
     for (Map.Entry<String, List<String>> mapping : mappings.entrySet()) {
       for (String value : mapping.getValue()) {
         bw.write(mapping.getKey() + value);
+        nameNode.write(outputFile, mapping.getKey() + value);
       }
     }
 
     bw.close();
-
-    nameNode.put(outputFile, rmiName);
   }
 
 }

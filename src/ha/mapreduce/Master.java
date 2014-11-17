@@ -22,25 +22,22 @@ public class Master {
       System.exit(0);
 
     } else {
-      // local default file
+      // load configuration file
       JobConf dc = new JobConf(args[0]);
       @SuppressWarnings("resource")
       ServerSocket newJobsSocket = new ServerSocket(dc.getMaster().getPort());
 
-      // bind jobtracker to rmi server
-      JobTracker jobTracker = new JobTracker();
-      JobTrackerInterface jt = (JobTrackerInterface) UnicastRemoteObject
-              .exportObject(jobTracker, 0);
+      // create RMI server
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
-      registry.bind("JobTracker", jt);
 
-      // start namenode, bind it to rmi server
-      // set tup namenode
-      // InetSocketAddress namenode=jc.getNamenode();
-      NameNode namenode = new NameNode(dc);
-      NameNodeInterface nf = (NameNodeInterface) UnicastRemoteObject.exportObject(namenode, 0);
-      registry.bind("NameNode", nf);
-      System.out.println("namenode ready");
+      // create and bind namenode to RMI server
+      registry.bind("NameNode",
+              (NameNodeInterface) UnicastRemoteObject.exportObject(new NameNode(dc), 0));
+
+      // create and bind jobtracker to RMI server
+      JobTracker jobTracker = new JobTracker(dc.getNamenode());
+      registry.bind("JobTracker",
+              (JobTrackerInterface) UnicastRemoteObject.exportObject(jobTracker, 0));
 
       while (true) {
         System.out.println("[MASTER] Waiting for new job on port " + "...");

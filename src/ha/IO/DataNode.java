@@ -28,11 +28,9 @@ public class DataNode implements DataNodeInterface {
   }
 
   @Override
-  public String read(String filename, int start, int end) throws RemoteException {
+  public String read(String filename, long start, int length) throws RemoteException {
     try {
       FileReader fr = new FileReader(filename);
-      int length = end - start;
-      System.out.println(length);
       char[] characters = new char[length];
       fr.skip(start);
       fr.read(characters, 0, length);

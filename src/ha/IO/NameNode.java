@@ -24,6 +24,8 @@ public class NameNode implements NameNodeInterface {
   // table of slave id, slave ip, key is slave id, value is slave id
 
   private HashMap<String, DataNodeInterface> stubMap;
+  
+  private HashMap<DataNodeInterface, Boolean> writables;
 
   private HashMap<String, List<DataNodeInterface>> filelocations;
 
@@ -32,15 +34,12 @@ public class NameNode implements NameNodeInterface {
 
   // private Registry r;
 
-
-
-  public NameNode(JobConf jc) throws RemoteException, NotBoundException {
-
+  public NameNode() throws RemoteException, NotBoundException {
 
     stubMap = new HashMap<String, DataNodeInterface>();
+    writables = new HashMap<DataNodeInterface, Boolean>();
     filelocations = new HashMap<String, List<DataNodeInterface>>();
     statusList = new HashMap<DataNodeInterface, Integer>();
-
 
   }
 
@@ -68,9 +67,14 @@ public class NameNode implements NameNodeInterface {
 
   private void allocateDataNodes(String filename, int n) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
-    // write to first two by default
-    addToFileLocations(filename, dnit.next());
-    addToFileLocations(filename, dnit.next());
+    int i = 0;
+    while (i < n) {
+      DataNodeInterface dni = dnit.next();
+      if (writables.get(dni)) {
+        i++;
+        addToFileLocations(filename, dni);
+      }
+    }
   }
 
   @Override
@@ -109,13 +113,16 @@ public class NameNode implements NameNodeInterface {
   }
 
   @Override
-  public void register(String rmiName, InetSocketAddress rmi_location) throws RemoteException,
-          NotBoundException {
-
-    stubMap.put(
-            rmiName,
-            (DataNodeInterface) LocateRegistry.getRegistry(rmi_location.getHostString(),
-                    rmi_location.getPort()).lookup(rmiName));
+  public void register(String rmiName, InetSocketAddress rmi_location, boolean writable) throws RemoteException {
+    try {
+      stubMap.put(
+              rmiName,
+              (DataNodeInterface) LocateRegistry.getRegistry(rmi_location.getHostString(),
+                      rmi_location.getPort()).lookup(rmiName));
+      writables.put(stubMap.get(rmiName), writable);
+    } catch (NotBoundException e) {
+      e.printStackTrace();
+    }
 
   }
 }

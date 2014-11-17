@@ -22,13 +22,15 @@ import java.util.Map;
  */
 public class TaskTracker implements Runnable {
   private List<TaskInProgress> mapTasks, reduceTasks;
+  
+  private NameNodeInterface nameNode;
 
   private JobTrackerInterface jobTracker;
 
   private InetSocketAddress thisMachine;
   
 
-  public TaskTracker(InetSocketAddress thisMachine, JobTrackerInterface jobTracker, int numMappers,
+  public TaskTracker(InetSocketAddress thisMachine, NameNodeInterface nameNode, JobTrackerInterface jobTracker, int numMappers,
           int numReducers) {
     mapTasks = new ArrayList<TaskInProgress>();
     reduceTasks = new ArrayList<TaskInProgress>();
@@ -42,6 +44,7 @@ public class TaskTracker implements Runnable {
       new Thread(tp).start();
       reduceTasks.add(tp);
     }
+    this.nameNode = nameNode;
     this.jobTracker = jobTracker;
     this.thisMachine = thisMachine;
   }
@@ -78,6 +81,7 @@ public class TaskTracker implements Runnable {
     for (TaskConf tc : (List<TaskConf>) jobGetter.invoke(jobTracker, thisMachine, availableTasks.size())) {
       try {
         Task newTask = (Task) tc.getTaskClass().newInstance();
+        newTask.setup(tc, nameNode);
         availableTasks.get(0).setupNewTask(newTask);
         availableTasks.remove(0);
         tasksReceived++;

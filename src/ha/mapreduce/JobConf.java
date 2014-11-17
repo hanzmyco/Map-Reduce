@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,17 +19,9 @@ public class JobConf extends Job implements Serializable {
   private InetSocketAddress master;
 
   private InetSocketAddress namenode;
-
-  private int inputfile_len;
-
-  public int getInputfile_len() {
-    return inputfile_len;
-  }
-
-  public void setInputfile_len(int inputfile_len) {
-    this.inputfile_len = inputfile_len;
-  }
-
+  
+  private int keySize, valueSize;
+  
   /**
    * Where the RMI server is located
    */
@@ -77,6 +72,18 @@ public class JobConf extends Job implements Serializable {
 
   public Integer getMappersPerSlave() {
     return mappersPerSlave;
+  }
+  
+  public int getKeySize() {
+    return keySize;
+  }
+  
+  public int getValueSize() {
+    return valueSize;
+  }
+  
+  public int getRecordSize() {
+    return keySize + valueSize;
   }
 
   public void setMappersPerSlave(Integer mappersPerSlave) {
@@ -140,13 +147,26 @@ public class JobConf extends Job implements Serializable {
     reducersPerSlave = 1;
     mapperClass = null;
     reducerClass = null;
-    inputfile_len = 0;
+    keySize = 0;
+    valueSize = 0;
 
     try {
       parseConf(conf);
     } catch (IOException e) {
       System.err.println("Cannot read job configuration!");
       e.printStackTrace();
+    }
+  }
+
+  public Registry getRegistry() {
+    try {
+      return (Registry) LocateRegistry.getRegistry(getRmiServer().getHostString(), getRmiServer()
+              .getPort());
+    } catch (RemoteException e) {
+      System.err.println("Can't get RMI registry!");
+      e.printStackTrace();
+      System.exit(0);
+      return null;
     }
   }
 
@@ -251,8 +271,11 @@ public class JobConf extends Job implements Serializable {
         case "DATANODE":
           datanodes.add(getInetSocketAddress(value));
           break;
-        case "INPUTFILE_LENTGH":
-          inputfile_len = Integer.parseInt(value);
+        case "KEY_SIZE":
+          keySize = Integer.parseInt(value);
+          break;
+        case "VALUE_SIZE":
+          valueSize = Integer.parseInt(value);
           break;
         default:
           System.err.println("Parameter \"" + getKey(line) + "\" unrecognized.");

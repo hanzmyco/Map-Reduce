@@ -31,11 +31,12 @@ public class Master {
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
 
       // create and bind namenode to RMI server
+      NameNodeInterface nameNode = new NameNode();
       registry.bind("NameNode",
-              (NameNodeInterface) UnicastRemoteObject.exportObject(new NameNode(dc), 0));
+              (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
 
       // create and bind jobtracker to RMI server
-      JobTracker jobTracker = new JobTracker(dc.getNamenode());
+      JobTracker jobTracker = new JobTracker(nameNode);
       registry.bind("JobTracker",
               (JobTrackerInterface) UnicastRemoteObject.exportObject(jobTracker, 0));
 

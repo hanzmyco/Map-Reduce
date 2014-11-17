@@ -4,43 +4,43 @@ import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Master node
  */
 
 public class JobTracker implements JobTrackerInterface {
-  private HashMap<Integer, JobInProgress> mapJobs;
+  private NameNodeInterface nameNode;
+  
+  private List<JobInProgress> jobs;
 
-  private int currentMap;
+  private Map<TaskConf, Boolean> mapTasks, reduceTasks;
 
-  private InetSocketAddress nameNodeAddress;
-
-  private HashMap<Integer, JobInProgress> reducejobs;
-
-  int currentReduce;
-
-  public JobTracker(InetSocketAddress nameNodeAddress) {
-    mapJobs = new HashMap<Integer, JobInProgress>();
-    currentMap = 0;
-    reducejobs = new HashMap<Integer, JobInProgress>();
-    currentReduce = 0;
-    this.nameNodeAddress = nameNodeAddress;
+  public JobTracker(NameNodeInterface nameNode) {
+    jobs = new ArrayList<JobInProgress>();
+    mapTasks = new LinkedHashMap<TaskConf, Boolean>();
+    reduceTasks = new LinkedHashMap<TaskConf, Boolean>();
+    this.nameNode = nameNode;
   }
 
   public int startJob(JobConf jf) throws IOException, InterruptedException {
-    JobInProgress jp = new JobInProgress(jf);
-    int len = mapJobs.size();
-    mapJobs.put(len, jp);
-    int len1 = reducejobs.size();
-    reducejobs.put(len1, jp);
-    return len;
+    jf.setJobID(jobs.size());
+    JobInProgress jp = new JobInProgress(jf, nameNode);
+
+    for (TaskConf task : jp.getMapTasks()) {
+      mapTasks.put(task, true);
+    }
+    for (TaskConf task : jp.getReduceTasks()) {
+      reduceTasks.put(task, true);
+    }
+
+    jobs.add(jp);
+    return jf.getJobID();
   }
 
   public String updateInformation(int JobID) throws RemoteException {
@@ -49,36 +49,19 @@ public class JobTracker implements JobTrackerInterface {
 
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
     List<TaskConf> temp = new ArrayList<TaskConf>();
-    JobInProgress jp = mapJobs.get(currentMap);
-    if (jp == null)
-      return temp;
-    while (true) {
-      while (tasksAvailable > 0 && jp.getNextSplit() <= jp.getInputSplit() * jp.getlineperSplit()) {
-        temp.add(new TaskConf(jp.getJc().getInputFile(), jp.getNextSplit(), jp.getNextSplit()
-                + jp.getlineperSplit(), 0, 0, (Class<Task>) (Class) jp.getJc().getMapperClass(),
-                currentMap));
+
+    for (Map.Entry<TaskConf, Boolean> task : mapTasks.entrySet()) {
+      if (task.getValue()) {
+        temp.add(task.getKey());
+        task.setValue(false);
         tasksAvailable--;
-        jp.setNextSplit(jp.getNextSplit() + jp.getlineperSplit());
-
       }
-      // if current job is finished
-      if (jp.getNextSplit() > jp.getInputSplit() * jp.getlineperSplit()) {
-        currentMap++;
-      }
-      // if still slave is still available
-      if (tasksAvailable > 0) {
-        if (currentMap >= mapJobs.size()) {
-          break;
-        } else
-          continue;
-      } else
+      if (tasksAvailable <= 0)
         break;
-
     }
 
     return temp;

@@ -1,10 +1,9 @@
 package ha.mapreduce;
 
+import ha.IO.NameNodeInterface;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +11,10 @@ import java.util.List;
 public class JobInProgress {
   private JobConf jc;
 
-  private int inputSplit; // how many splits
+  private NameNodeInterface nameNode;
 
-  private int nextSplit; // coming split index, starts from 1,
+  private int recordsPerSplit = 2; //
 
-  private int lineperSplit; //
-  
   // key is taskID, value is split integer
   private HashMap<Integer, Integer> taskMappings;
 
@@ -29,55 +26,37 @@ public class JobInProgress {
     this.taskMappings = record;
   }
 
-  public JobConf getJc() {
+  public JobConf getJobConf() {
     return jc;
   }
 
-  public void setJc(JobConf jc) {
+  public JobInProgress(JobConf jc, NameNodeInterface nameNode) throws IOException {
     this.jc = jc;
-  }
+    taskMappings = new HashMap<Integer, Integer>();
+    this.nameNode = nameNode;
 
-  public int getInputSplit() {
-    return inputSplit;
-  }
-
-  public void setInputSplit(int inputSplit) {
-    this.inputSplit = inputSplit;
-  }
-
-  public int getNextSplit() {
-    return nextSplit;
-  }
-
-  public void setNextSplit(int nextSplit) {
-    this.nextSplit = nextSplit;
-  }
-
-  public int getlineperSplit() {
-    return lineperSplit;
-  }
-
-  public void setlineperSplit(int lastline) {
-    this.lineperSplit = lastline;
-  }
-
-  public JobInProgress(JobConf jc) throws IOException {
-    this.jc = jc;
-    taskMappings= new HashMap<Integer,Integer>();
-    setlineperSplit(10);
-    setInputSplit(inputSplit(jc,lineperSplit));
-    
-    setNextSplit(1);
-    
-    
     System.err.println("[JOB] Received new job conf as such:");
     System.err.println(jc);
   }
 
-  public int inputSplit(JobConf jc,int lineperSplit) {
-    // check if the file exceeds a certain amoung of data
-    return (jc.getInputfile_len()/lineperSplit) +1;
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public List<TaskConf> getMapTasks() {
+    try {
+      long numRecords = nameNode.getFileSize(jc.getInputFile());
+      int numSplits = (int) Math.ceil(numRecords * 1.0 / (recordsPerSplit * jc.getRecordSize()));
+      List<TaskConf> tasks = new ArrayList<TaskConf>();
+      for (int i = 0; i < numSplits; i++) {
+        tasks.add(new TaskConf(jc.getInputFile(), i * recordsPerSplit, recordsPerSplit, jc.getKeySize(), jc.getValueSize(), (Class<Task>) (Class) jc.getMapperClass(), jc.getJobID()));
+      }
+      return tasks;
+    } catch (RemoteException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 
+  public List<TaskConf> getReduceTasks() {
+    return new ArrayList<TaskConf>();
   }
 
 }

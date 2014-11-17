@@ -40,7 +40,6 @@ public abstract class Task {
     this.jobID = tc.getJobID();
     this.collector = new OutputCollector(tc.getFilename() + "_" + tc.getJobID() + ".map", nameNode,
             keySize, valueSize);
-
   }
 
   protected abstract void process() throws IOException;

@@ -1,11 +1,16 @@
 package ha.mapreduce;
 
+import ha.IO.DataNode;
+import ha.IO.NameNodeInterface;
+
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class JobClient {
@@ -77,9 +82,9 @@ public class JobClient {
     }
   }
 
-  public static void main(String[] args) {
-    if (args.length != 1) {
-      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> ");
+  public static void main(String[] args) throws RemoteException, NotBoundException {
+    if (args.length != 2) {
+      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> <client address>:<client port>");
       System.exit(0);
     }
 
@@ -87,6 +92,16 @@ public class JobClient {
     System.out.println("[CLIENT] Setting up new job as such:");
     System.out.println(conf);
     JobClient client = new JobClient(conf);
+    
+    System.out.println("[CLIENT] Submitting input file to DFS");
+    InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
+    Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
+    String dataNodeName = thisMachine.toString() + " data node";
+    new DataNode(dataNodeName, registry2, thisMachine);
+    NameNodeInterface nameNode = (NameNodeInterface) conf.getRegistry().lookup("NameNode");
+    nameNode.register(dataNodeName, thisMachine, false);
+    nameNode.put(conf.getInputFile(), dataNodeName);
+    
     try {
       client.submitJob(conf);
     } catch (Exception e) {

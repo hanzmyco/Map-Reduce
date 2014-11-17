@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
 public class Job {
-  private String JobID;
+  private Integer JobID;
 
   private String JobName;
 
@@ -9,11 +9,11 @@ public class Job {
 
   private String JobPort;
 
-  public String getJobID() {
+  public Integer getJobID() {
     return JobID;
   }
 
-  public void setJobID(String jobID) {
+  public void setJobID(Integer jobID) {
     JobID = jobID;
   }
 

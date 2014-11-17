@@ -21,30 +21,21 @@ public class Slave {
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
 
     try {
-      
-      
-      
-      
-      
-      Registry registry = (Registry) LocateRegistry.getRegistry(
-              conf.getRmiServer().getHostString(), conf.getRmiServer().getPort());
+
+      Registry registry = conf.getRegistry();
 
       // every datanode(slave) has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
-      
       Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
-      DataNode dn=new DataNode(thisMachine.toString() + " data node",registry2,thisMachine,nameNode);
+      String dataNodeName = thisMachine.toString() + " data node";
+      new DataNode(dataNodeName, registry2, thisMachine);
+      nameNode.register(dataNodeName, thisMachine, true);
       System.out.println("finished datanode registry");
-      
-      
-      
-      
-      
-      
 
-      new Thread(new TaskTracker(thisMachine, (JobTrackerInterface) registry.lookup("JobTracker"),
-              conf.getMappersPerSlave(), conf.getReducersPerSlave())).start();
+      new Thread(new TaskTracker(thisMachine, nameNode,
+              (JobTrackerInterface) registry.lookup("JobTracker"), conf.getMappersPerSlave(),
+              conf.getReducersPerSlave())).start();
     } catch (Exception e) {
       System.err.println("[SLAVE] Error getting stub for JobTracker " + e.toString());
       e.printStackTrace();

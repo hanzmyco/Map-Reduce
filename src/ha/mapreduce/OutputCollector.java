@@ -32,10 +32,11 @@ public class OutputCollector {
 
   public void collect(String key, String value) {
     if (key.length() != keySize) {
-      System.err.println("Key \"" + key + "\" is not of size " + keySize + "!");
-    } else if (key.length() != keySize) {
-      System.err.println("Value \"" + value + "\" is not of size " + valueSize + "!");
+      System.err.println("[COLLECTOR] Key \"" + key + "\" is not of size " + keySize + "!");
+    } else if (value.length() != valueSize) {
+      System.err.println("[COLLECTOR] Value \"" + value + "\" is not of size " + valueSize + "!");
     } else {
+      System.out.println("[COLLECTOR] Collecting (" + key + "," + value + ")");
       if (!mappings.containsKey(key)) {
         mappings.put(key, new ArrayList<String>());
       }

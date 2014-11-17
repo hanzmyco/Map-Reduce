@@ -1,6 +1,5 @@
 package ha.mapreduce;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,13 +10,12 @@ public abstract class Reducer extends Task {
   
   @Override
   public void process() throws IOException {
-    int recordSize = this.keySize + this.valueSize;
-    byte[] key = new byte[keySize], value = new byte[valueSize];
+    byte[] key = new byte[taskConf.getKeySize()], value = new byte[taskConf.getValueSize()];
     String previousKey = "";
     List<String> values = new ArrayList<String>();
-    for (int offset = recordStart * recordSize; offset < (recordStart + recordCount) * recordSize; offset += recordSize) {
-      if (isr.read(key, offset, keySize) == -1) break;
-      if (isr.read(value, offset, valueSize) == -1) break;
+    for (int offset = taskConf.getStart(); offset < taskConf.getEnd(); offset += taskConf.getRecordSize()) {
+      if (isr.read(key, offset, taskConf.getKeySize()) == -1) break;
+      if (isr.read(value, offset, taskConf.getValueSize()) == -1) break;
       String currentKey = new String(key), currentValue = new String(value);
       
       if (currentKey.equals(previousKey)) { // add to list of values to reduce

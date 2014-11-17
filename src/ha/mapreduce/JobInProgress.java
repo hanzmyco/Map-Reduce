@@ -40,14 +40,20 @@ public class JobInProgress {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public List<TaskConf> getMapTasks() {
+  public List<TaskConf> getMapTasks(int id) {
     try {
       long numRecords = nameNode.getFileSize(jc.getInputFile());
       int numSplits = (int) Math.ceil(numRecords * 1.0 / (recordsPerSplit * jc.getRecordSize()));
       List<TaskConf> tasks = new ArrayList<TaskConf>();
       for (int i = 0; i < numSplits; i++) {
-        tasks.add(new TaskConf(jc.getInputFile(), i * recordsPerSplit, recordsPerSplit, jc.getKeySize(), jc.getValueSize(), (Class<Task>) (Class) jc.getMapperClass(), jc.getJobID()));
+        TaskConf newTask = new TaskConf(jc.getInputFile(), i * recordsPerSplit, recordsPerSplit,
+                jc.getKeySize(), jc.getValueSize(), (Class<Task>) (Class) jc.getMapperClass(),
+                jc.getJobID(), id++);
+        tasks.add(newTask);
+        System.out.println("[JOB " + jc.getJobID() + "] Created Task #" + newTask.getTaskID()
+                + " responsible for records starting at " + newTask.getRecordStart());
       }
+      System.out.println("[JOB " + jc.getJobID() + "] Created " + tasks.size() + " new map tasks");
       return tasks;
     } catch (RemoteException e) {
       e.printStackTrace();

@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class JobTracker implements JobTrackerInterface {
   private NameNodeInterface nameNode;
-  
+
   private List<JobInProgress> jobs;
 
   private Map<TaskConf, Boolean> mapTasks, reduceTasks;
@@ -32,7 +32,7 @@ public class JobTracker implements JobTrackerInterface {
     jf.setJobID(jobs.size());
     JobInProgress jp = new JobInProgress(jf, nameNode);
 
-    for (TaskConf task : jp.getMapTasks()) {
+    for (TaskConf task : jp.getMapTasks(mapTasks.size())) {
       mapTasks.put(task, true);
     }
     for (TaskConf task : jp.getReduceTasks()) {
@@ -52,10 +52,13 @@ public class JobTracker implements JobTrackerInterface {
   @Override
   public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
+    System.out.println("[JOB TRACKER] Received request for " + tasksAvailable + " map tasks");
     List<TaskConf> temp = new ArrayList<TaskConf>();
 
     for (Map.Entry<TaskConf, Boolean> task : mapTasks.entrySet()) {
       if (task.getValue()) {
+        System.out.println("[JOB TRACKER] Allocating task " + task.getKey().getTaskID()
+                + " from job " + task.getKey().getJobID());
         temp.add(task.getKey());
         task.setValue(false);
         tasksAvailable--;
@@ -64,6 +67,7 @@ public class JobTracker implements JobTrackerInterface {
         break;
     }
 
+    System.out.println("[JOB TRACKER] Returning " + temp.size() + " task confs");
     return temp;
   }
 

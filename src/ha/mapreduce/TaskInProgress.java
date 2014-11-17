@@ -16,23 +16,34 @@ public class TaskInProgress implements Runnable {
     this.task = task;
     status = Status.ASSIGNED;
 
-    System.out.println("[TASK " + task.getJobID() + "] Received new task of " + task.getClass());
+    System.out.println("[TASK TRACKER] Received task " + task.getTaskID() + " of " + task.getClass() + " for job " + task.getJobID());
   }
 
   @Override
   public void run() {
-    while (this.task != null) {
-      status = Status.BUSY;
+    while (true) {
+      while (this.task != null) {
+        status = Status.BUSY;
 
+        try {
+          task.process();
+
+        } catch (IOException e) {
+          System.err.println("[TASK " + task.getJobID() + "] IO problems for task of "
+                  + task.getClass());
+          e.printStackTrace();
+        }
+        System.out.println("[TASK " + task.getJobID() + "] Finished processing "
+                + task.getCollector().getOutputFile());
+        status = Status.AVAILABLE;
+      }
+      
       try {
-        task.process();
-
-      } catch (IOException e) {
-        System.err.println("[TASK " + task.getJobID() + "] IO problems for task of " + task.getClass());
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      System.out.println("[TASK " + task.getJobID() + "] Finished processing " + task.getCollector().getOutputFile());
-      status = Status.AVAILABLE;
+      //System.out.println("[TASK TRACKER] Still nothing");
     }
   }
 

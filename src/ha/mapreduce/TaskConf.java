@@ -7,12 +7,12 @@ public class TaskConf implements Serializable {
 
   private String filename;
 
-  private int recordStart, recordCount, keySize, valueSize, jobID;
+  private int recordStart, recordCount, keySize, valueSize, jobID, taskID;
 
   private Class<Task> taskClass;
 
   public TaskConf(String filename, int recordStart, int recordCount, int keySize, int valueSize,
-          Class<Task> taskClass, int jobID) {
+          Class<Task> taskClass, int jobID, int taskID) {
     this.filename = filename;
     this.recordStart = recordStart;
     this.recordCount = recordCount;
@@ -20,6 +20,7 @@ public class TaskConf implements Serializable {
     this.valueSize = valueSize;
     this.taskClass = taskClass;
     this.jobID = jobID;
+    this.taskID = taskID;
   }
 
   public String getFilename() {
@@ -28,6 +29,18 @@ public class TaskConf implements Serializable {
 
   public int getRecordStart() {
     return recordStart;
+  }
+  
+  public int getRecordEnd() {
+    return recordStart + recordCount;
+  }
+  
+  public int getStart() {
+    return getRecordStart() * getRecordSize();
+  }
+  
+  public int getEnd() {
+    return getRecordEnd() * getRecordSize();
   }
 
   public int getRecordCount() {
@@ -40,6 +53,10 @@ public class TaskConf implements Serializable {
 
   public int getValueSize() {
     return valueSize;
+  }
+  
+  public int getRecordSize() {
+    return keySize + valueSize;
   }
 
   /**
@@ -54,5 +71,12 @@ public class TaskConf implements Serializable {
    */
   public int getJobID() {
     return jobID;
+  }
+  
+  /**
+   * @return the taskID
+   */
+  public int getTaskID() {
+    return taskID;
   }
 }

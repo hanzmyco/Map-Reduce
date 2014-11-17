@@ -7,16 +7,14 @@ public abstract class Mapper extends Task {
 
   @Override
   public void process() throws IOException {
-    int recordSize = this.keySize + this.valueSize;
-    byte[] key = new byte[keySize], value = new byte[valueSize];
-    for (int offset = recordStart * recordSize; offset < (recordStart + recordCount) * recordSize; offset += recordSize) {
-      if (isr.read(key, offset, keySize) == -1) break;
-      if (isr.read(value, offset, valueSize) == -1) break;
+    byte[] key = new byte[taskConf.getKeySize()], value = new byte[taskConf.getValueSize()];
+    for (int offset = taskConf.getStart(); offset < taskConf.getEnd(); offset += taskConf.getRecordSize()) {
+      System.out.println("[MAPPER " + taskConf.getTaskID() + "] Reading from " + offset + " to " + (offset + taskConf.getRecordSize()));
+      if (isr.read(key, offset, taskConf.getKeySize()) == -1) break;
+      if (isr.read(value, offset, taskConf.getValueSize()) == -1) break;
+      System.out.println("[MAPPER " + taskConf.getTaskID() + "] Calling map function on (" + new String(key) + ", " + new String(value) + ")");
       map(new String(key), new String(value), collector);
     }
     collector.write2Disk();
-    
-    
-    
   }
 }

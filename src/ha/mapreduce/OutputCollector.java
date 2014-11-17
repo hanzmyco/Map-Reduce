@@ -30,7 +30,7 @@ public class OutputCollector {
     this.nameNode = nameNode;
   }
 
-  public void collect(String key, String value) throws IOException {
+  public void collect(String key, String value) {
     if (key.length() != keySize) {
       System.err.println("Key \"" + key + "\" is not of size " + keySize + "!");
     } else if (key.length() != keySize) {

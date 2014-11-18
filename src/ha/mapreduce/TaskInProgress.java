@@ -6,7 +6,7 @@ public class TaskInProgress implements Runnable {
   private Task task;
 
   private Status status;
-  
+
   private int tipID;
 
   public TaskInProgress(int id) {
@@ -18,13 +18,14 @@ public class TaskInProgress implements Runnable {
     this.task = task;
     status = Status.ASSIGNED;
 
-    System.out.println("[TASK TRACKER] Received task " + task.getTaskID() + " of " + task.getClass() + " for job " + task.getJobID());
+    System.out.println("[TASK TRACKER] Received task " + task.getTaskID() + " of "
+            + task.getClass() + " for job " + task.getJobID());
   }
-  
+
   public int getID() {
     return tipID;
   }
-  
+
   /**
    * @return the status
    */
@@ -35,11 +36,11 @@ public class TaskInProgress implements Runnable {
   public Integer getJobID() {
     return task.getJobID();
   }
-  
+
   public Task getTask() {
     return task;
   }
-  
+
   public void clearTask() {
     task = null;
   }
@@ -61,7 +62,7 @@ public class TaskInProgress implements Runnable {
                 + task.taskConf.getOutputFilename());
         status = Status.AVAILABLE;
       }
-      
+
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {

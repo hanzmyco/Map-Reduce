@@ -37,7 +37,6 @@ public class OutputCollector {
     } else if (value.length() != valueSize) {
       System.err.println("[COLLECTOR] Value \"" + value + "\" is not of size " + valueSize + "!");
     } else {
-      System.out.println("[COLLECTOR] Collecting (" + key + "," + value + ")");
       if (!mappings.containsKey(key)) {
         mappings.put(key, new ArrayList<String>());
       }

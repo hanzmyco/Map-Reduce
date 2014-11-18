@@ -1,11 +1,9 @@
 package ha.mapreduce;
 
-import ha.IO.DataNodeInterface;
 import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -40,7 +38,7 @@ public class JobTracker implements JobTrackerInterface {
     jf.setJobID(jobs.size());
     JobInProgress jp = new JobInProgress(jf, nameNode);
 
-    for (TaskConf task : jp.getMapTasks(mapTasks.size())) {
+    for (TaskConf task : jp.getMapTasks(mapTasks.size() + reduceTasks.size())) {
       mapTasks.put(task, true);
     }
     for (TaskConf task : jp.getReduceTasks()) {
@@ -53,14 +51,33 @@ public class JobTracker implements JobTrackerInterface {
 
   public String getStatuses() throws RemoteException {
     StringBuilder sb = new StringBuilder();
-    
+
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> entry : taskTrackers.entrySet()) {
       sb.append(entry.getKey() + ":\n");
       for (TaskStatus taskStatus : entry.getValue().getTaskStatuses()) {
         sb.append("  " + taskStatus + "\n");
       }
     }
+
+    int assigned = 0, unassigned = 0;
+    for (Boolean unAssigned : mapTasks.values()) {
+      if (unAssigned)
+        unassigned++;
+      else
+        assigned++;
+    }
+    sb.append("\nMap tasks: " + assigned + " assigned, " + unassigned + " unassigned.\n");
     
+    assigned = 0;
+    unassigned = 0;
+    for (Boolean unAssigned : reduceTasks.values()) {
+      if (unAssigned)
+        unassigned++;
+      else
+        assigned++;
+    }
+    sb.append("Reduce tasks: " + assigned + " assigned, " + unassigned + " unassigned.\n");
+
     return sb.toString();
   }
 
@@ -94,7 +111,8 @@ public class JobTracker implements JobTrackerInterface {
   }
 
   @Override
-  public void registerAsSlave(String rmiName, InetSocketAddress rmi_location) throws RemoteException {
+  public void registerAsSlave(String rmiName, InetSocketAddress rmi_location)
+          throws RemoteException {
     try {
       taskTrackers.put(
               rmi_location,
@@ -103,5 +121,11 @@ public class JobTracker implements JobTrackerInterface {
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void markAsDone(TaskConf tc) {
+    System.out.println("[JOB TRACKER] Received request to mark task " + tc.getTaskID() + " as done");
+    reduceTasks.remove(tc);
   }
 }

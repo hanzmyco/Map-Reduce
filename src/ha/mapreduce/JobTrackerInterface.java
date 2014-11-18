@@ -27,4 +27,9 @@ public interface JobTrackerInterface extends Remote {
    */
   public List<TaskConf> getReduceTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException;
+  
+  /**
+   * Mark that task as done
+   */
+  public void markAsDone(TaskConf tc) throws RemoteException;
 }

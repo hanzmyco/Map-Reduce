@@ -16,8 +16,6 @@ import java.util.Map;
  * it handle one machine, how many mapper(map tasks), how many reducer tasks it will construct the
  * TaskInProgress the JobTracker will use rmi or rpc to call the for tasktracker and then
  * tasktracker will generate taskinprogress
- * 
- * @author hanz
  *
  */
 public class TaskTracker implements TaskTrackerInterface, Runnable {
@@ -62,9 +60,18 @@ public class TaskTracker implements TaskTrackerInterface, Runnable {
 
   private List<TaskInProgress> availableTasksInProgress(List<TaskInProgress> tasks) {
     List<TaskInProgress> availableTasks = new ArrayList<TaskInProgress>();
-    for (TaskInProgress task : mappers) {
-      if (task.getStatus() == Status.AVAILABLE) {
-        availableTasks.add(task);
+    for (TaskInProgress tip : mappers) {
+      if (tip.getStatus() == Status.AVAILABLE) {
+        if (tip.getTask() != null) {
+          try {
+            jobTracker.markAsDone(tip.getTask().taskConf);
+            tip.clearTask();
+          } catch (RemoteException e) {
+            System.err.println("[TASK TRACKER] Can't tell job tracker that task " + tip.getTask().getTaskID() + " is done");
+            e.printStackTrace();
+          }
+        }
+        availableTasks.add(tip);
       }
     }
     return availableTasks;

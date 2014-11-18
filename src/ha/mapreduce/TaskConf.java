@@ -23,10 +23,23 @@ public class TaskConf implements Serializable {
     this.taskID = taskID;
   }
 
+  @Override
+  public boolean equals(Object arg0) {
+    if (getClass() == arg0.getClass()) {
+      return this.taskID == ((TaskConf) arg0).taskID;
+    } else
+      return false;
+  }
+  
+  @Override
+  public int hashCode() {
+    return taskID;
+  }
+
   public String getInputFilename() {
     return inputFile;
   }
-  
+
   public String getOutputFilename() {
     return getInputFilename() + "_" + getTaskID() + ".map";
   }
@@ -34,15 +47,15 @@ public class TaskConf implements Serializable {
   public int getRecordStart() {
     return recordStart;
   }
-  
+
   public int getRecordEnd() {
     return recordStart + recordCount;
   }
-  
+
   public int getStart() {
     return getRecordStart() * getRecordSize();
   }
-  
+
   public int getEnd() {
     return getRecordEnd() * getRecordSize();
   }
@@ -58,7 +71,7 @@ public class TaskConf implements Serializable {
   public int getValueSize() {
     return valueSize;
   }
-  
+
   public int getRecordSize() {
     return keySize + valueSize;
   }
@@ -76,7 +89,7 @@ public class TaskConf implements Serializable {
   public int getJobID() {
     return jobID;
   }
-  
+
   /**
    * @return the taskID
    */

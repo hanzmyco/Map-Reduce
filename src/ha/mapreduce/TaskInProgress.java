@@ -39,11 +39,15 @@ public class TaskInProgress implements Runnable {
   public Task getTask() {
     return task;
   }
+  
+  public void clearTask() {
+    task = null;
+  }
 
   @Override
   public void run() {
     while (true) {
-      while (this.task != null) {
+      while (status == Status.ASSIGNED && this.task != null) {
         status = Status.BUSY;
 
         try {
@@ -56,8 +60,6 @@ public class TaskInProgress implements Runnable {
         System.out.println("[TASK " + task.getJobID() + "] Finished processing "
                 + task.getCollector().getOutputFile());
         status = Status.AVAILABLE;
-        
-        task = null;
       }
       
       try {

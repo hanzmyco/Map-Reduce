@@ -74,31 +74,35 @@ public class JobInProgress {
     byte[] key1 = new byte[jc.getKeySize()], key2 = new byte[jc.getKeySize()], value1 = new byte[jc
             .getValueSize()], value2 = new byte[jc.getValueSize()];
     long records1 = nameNode.getFileSize(file1) / jc.getRecordSize(), records2 = nameNode
-            .getFileSize(file2) / jc.getRecordSize(), i1 = 1, i2 = 1;
+            .getFileSize(file2) / jc.getRecordSize(), i1 = 0, i2 = 0;
     is1.read(key1, value1);
     is2.read(key2, value2);
 
     while (i1 < records1 && i2 < records2) {
-      if (new String(key1).compareTo(new String(key2)) == -1) {
+      System.err.println("[JOB IN PROGRESS] Comparing \"" + new String(key1) + "\" and \""
+              + new String(key2) + "\"");
+      if (new String(key1).compareTo(new String(key2)) < -1) {
         os.write(key1, value1);
-        is1.read(key1, value1);
-        i1++;
+        if (++i1 < records1)
+          is1.read(key1, value1);
       } else {
         os.write(key2, value2);
-        is2.read(key2, value2);
-        i2++;
+        if (++i2 < records2)
+          is2.read(key2, value2);
       }
     }
 
-    while (i1 < records1) {
+    if (i1 < records1)
+      os.write(key1, value1);
+    while (++i1 < records1) {
       is1.read(key1, value1);
       os.write(key1, value1);
-      i1++;
     }
-    while (i2 < records2) {
+    if (i2 < records2)
+      os.write(key2, value2);
+    while (++i2 < records2) {
       is2.read(key2, value2);
       os.write(key2, value2);
-      i2++;
     }
 
     is1.close();
@@ -110,9 +114,10 @@ public class JobInProgress {
 
   public String getSortedFile() throws IOException {
     String baseSortedFile = jc.getInputFile() + "_sorted_", prevFile = mergeFiles(mapTasks.get(0)
-            .getOutputFilename(), mapTasks.get(1).getOutputFilename(), baseSortedFile + 1);
+            .getOutputFilename(), mapTasks.get(1).getOutputFilename(), baseSortedFile + 1 + ".map");
     for (int i = 2; i < mapTasks.size(); i++) {
-      prevFile = mergeFiles(prevFile, mapTasks.get(i).getOutputFilename(), baseSortedFile + i);
+      prevFile = mergeFiles(prevFile, mapTasks.get(i).getOutputFilename(), baseSortedFile + i
+              + ".map");
     }
     return prevFile;
   }

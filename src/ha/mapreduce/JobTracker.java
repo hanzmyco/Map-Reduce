@@ -4,6 +4,7 @@ import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -26,12 +27,16 @@ public class JobTracker implements JobTrackerInterface {
 
   private Map<InetSocketAddress, TaskTrackerInterface> taskTrackers;
 
+  private Map<InetSocketAddress, List<TaskConf>> taskList;
+
   public JobTracker(NameNodeInterface nameNode) {
     jobs = new ArrayList<JobInProgress>();
     mapTasks = new LinkedHashMap<TaskConf, Boolean>();
     reduceTasks = new LinkedHashMap<TaskConf, Boolean>();
     this.nameNode = nameNode;
     taskTrackers = new HashMap<InetSocketAddress, TaskTrackerInterface>();
+    taskList = new HashMap<InetSocketAddress, List<TaskConf>>();
+
   }
 
   public int startJob(JobConf jf) throws IOException, InterruptedException {
@@ -92,6 +97,9 @@ public class JobTracker implements JobTrackerInterface {
         System.out.println("[JOB TRACKER] Allocating task " + task.getKey().getTaskID()
                 + " from job " + task.getKey().getJobID());
         temp.add(task.getKey());
+
+        taskList.get(slave).add(task.getKey());
+
         task.setValue(false);
         tasksAvailable--;
       }
@@ -106,7 +114,7 @@ public class JobTracker implements JobTrackerInterface {
   @Override
   public List<TaskConf> getReduceTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
-    // TODO HANZ
+
     return new ArrayList<TaskConf>();
   }
 
@@ -118,6 +126,7 @@ public class JobTracker implements JobTrackerInterface {
               rmi_location,
               (TaskTrackerInterface) LocateRegistry.getRegistry(rmi_location.getHostString(),
                       rmi_location.getPort()).lookup(rmiName));
+      taskList.put(rmi_location, new ArrayList<TaskConf>());
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
@@ -126,6 +135,33 @@ public class JobTracker implements JobTrackerInterface {
   @Override
   public void markAsDone(TaskConf tc) {
     System.out.println("[JOB TRACKER] Received request to mark task " + tc.getTaskID() + " as done");
+    mapTasks.remove(tc);
     reduceTasks.remove(tc);
+  }
+
+  public void heartBeat() throws RemoteException {
+    for (Map.Entry<InetSocketAddress, TaskTrackerInterface> pairs : taskTrackers.entrySet()) {
+      TaskTrackerInterface t = pairs.getValue();
+
+      try {
+        System.out.println(t.sayhello());
+      } catch (Exception e) {
+        // do somehting
+        // set the task to do again
+
+        List<TaskConf> tconfList = taskList.get(pairs.getKey());
+        for (TaskConf tf : tconfList) {
+          if (mapTasks.containsKey(tf)) {
+            mapTasks.put(tf, true);
+          }
+          if (reduceTasks.containsKey(tf)) {
+            reduceTasks.put(tf, true);
+          }
+        }
+
+      }
+
+      System.out.println(pairs.getKey() + " = " + pairs.getValue());
+    }
   }
 }

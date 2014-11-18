@@ -88,7 +88,14 @@ public class JobClient {
       System.exit(0);
     }
 
-    JobConf conf = new JobConf(args[0]);
+    JobConf conf = null;
+    try {
+      conf = new JobConf(args[0]);
+    } catch (IOException e1) {
+      System.err.println("Cannot read configuration file!");
+      e1.printStackTrace();
+      System.exit(1);
+    }
     System.out.println("[CLIENT] Setting up new job as such:");
     System.out.println(conf);
     JobClient client = new JobClient(conf);

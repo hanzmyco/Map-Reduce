@@ -19,9 +19,9 @@ public class JobConf extends Job implements Serializable {
   private InetSocketAddress master;
 
   private InetSocketAddress namenode;
-  
+
   private int keySize, valueSize;
-  
+
   /**
    * Where the RMI server is located
    */
@@ -45,6 +45,37 @@ public class JobConf extends Job implements Serializable {
    * Number of reducers running on each slave at one time
    */
   private Integer reducersPerSlave;
+
+  /**
+   * Which class the mapper is part of
+   */
+  @SuppressWarnings("rawtypes")
+  private Class mapperClass;
+
+  /**
+   * Which class the reducer is part of
+   */
+  @SuppressWarnings("rawtypes")
+  private Class reducerClass;
+
+  /**
+   * Initialize with a local configuration file on disk
+   */
+  public JobConf(String conf) throws IOException {
+    master = null;
+    namenode = null;
+    rmiServer = null;
+    slaves = new ArrayList<InetSocketAddress>();
+    datanodes = new ArrayList<InetSocketAddress>();
+    mappersPerSlave = 1;
+    reducersPerSlave = 1;
+    mapperClass = null;
+    reducerClass = null;
+    keySize = 0;
+    valueSize = 0;
+
+    parseConf(conf);
+  }
 
   public InetSocketAddress getNamenode() {
     return namenode;
@@ -73,15 +104,15 @@ public class JobConf extends Job implements Serializable {
   public Integer getMappersPerSlave() {
     return mappersPerSlave;
   }
-  
+
   public int getKeySize() {
     return keySize;
   }
-  
+
   public int getValueSize() {
     return valueSize;
   }
-  
+
   public int getRecordSize() {
     return keySize + valueSize;
   }
@@ -98,64 +129,12 @@ public class JobConf extends Job implements Serializable {
     return rmiServer;
   }
 
-  public void setRmiServer(InetSocketAddress rmiServer) {
-    this.rmiServer = rmiServer;
-  }
-
-  public void setMaster(InetSocketAddress master) {
-    this.master = master;
-  }
-
   public List<InetSocketAddress> getSlaves() {
     return slaves;
   }
 
-  public void setSlaves(List<InetSocketAddress> slaves) {
-    this.slaves = slaves;
-  }
-
   public Integer getReducersPerSlave() {
     return reducersPerSlave;
-  }
-
-  public void setReducersPerSlave(Integer reducersPerSlave) {
-    this.reducersPerSlave = reducersPerSlave;
-  }
-
-  /**
-   * Which class the mapper is part of
-   */
-  @SuppressWarnings("rawtypes")
-  private Class mapperClass;
-
-  /**
-   * Which class the reducer is part of
-   */
-  @SuppressWarnings("rawtypes")
-  private Class reducerClass;
-
-  /**
-   * Initialize with a local configuration file on disk
-   */
-  public JobConf(String conf) {
-    master = null;
-    namenode = null;
-    rmiServer = null;
-    slaves = new ArrayList<InetSocketAddress>();
-    datanodes = new ArrayList<InetSocketAddress>();
-    mappersPerSlave = 1;
-    reducersPerSlave = 1;
-    mapperClass = null;
-    reducerClass = null;
-    keySize = 0;
-    valueSize = 0;
-
-    try {
-      parseConf(conf);
-    } catch (IOException e) {
-      System.err.println("Cannot read job configuration!");
-      e.printStackTrace();
-    }
   }
 
   public Registry getRegistry() {

@@ -36,6 +36,7 @@ public class JobInProgress {
     try {
       long numRecords = nameNode.getFileSize(jc.getInputFile());
       int numSplits = (int) Math.ceil(numRecords * 1.0 / (recordsPerSplit * jc.getRecordSize()));
+      System.out.println("[JOB " + jc.getJobID() + "] Input file has " + numRecords + " records");
       mapTasks = new ArrayList<TaskConf>();
       for (int i = 0; i < numSplits; i++) {
         TaskConf newTask = new TaskConf(jc.getInputFile(), i * recordsPerSplit, recordsPerSplit,

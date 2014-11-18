@@ -56,11 +56,14 @@ public class NameNode implements NameNodeInterface {
     return getStubFor(filename).read(filename, start, length);
   }
 
+  /**
+   * Make sure there are at least N data nodes containing replicas of the file
+   */
   private void allocateDataNodes(String filename, int n) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
-    while (filelocations.containsKey(filename) && filelocations.get(filename).size() >= n) {
+    while (!filelocations.containsKey(filename) || filelocations.get(filename).size() < n) {
       if (!dnit.hasNext()) {
-        System.err.println("Not enough data nodes to allocate!");
+        System.err.println("[NAME NODE] Not enough data nodes to allocate!");
         break;
       }
       

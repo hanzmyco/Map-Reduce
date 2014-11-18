@@ -22,16 +22,15 @@ import java.util.Map;
  */
 public class TaskTracker implements TaskTrackerInterface, Runnable {
   private List<TaskInProgress> mappers, reducers;
-  
+
   private NameNodeInterface nameNode;
 
   private JobTrackerInterface jobTracker;
 
   private InetSocketAddress thisMachine;
-  
 
-  public TaskTracker(InetSocketAddress thisMachine, NameNodeInterface nameNode, JobTrackerInterface jobTracker, int numMappers,
-          int numReducers) {
+  public TaskTracker(InetSocketAddress thisMachine, NameNodeInterface nameNode,
+          JobTrackerInterface jobTracker, int numMappers, int numReducers) {
     mappers = new ArrayList<TaskInProgress>();
     reducers = new ArrayList<TaskInProgress>();
     for (int i = 0; i < numMappers; i++) {
@@ -78,10 +77,14 @@ public class TaskTracker implements TaskTrackerInterface, Runnable {
     System.out.println("[TASK TRACKER] Asking for " + availableTasks.size() + " new " + jobType
             + " tasks...");
     int tasksReceived = 0;
-    if (jobTracker == null) System.err.println("arst");
-    if (thisMachine == null) System.err.println("brst");
-    if (jobGetter == null) System.err.println("crst");
-    for (TaskConf tc : (List<TaskConf>) jobGetter.invoke(jobTracker, thisMachine, availableTasks.size())) {
+    if (jobTracker == null)
+      System.err.println("arst");
+    if (thisMachine == null)
+      System.err.println("brst");
+    if (jobGetter == null)
+      System.err.println("crst");
+    for (TaskConf tc : (List<TaskConf>) jobGetter.invoke(jobTracker, thisMachine,
+            availableTasks.size())) {
       try {
         Task newTask = (Task) tc.getTaskClass().newInstance();
         newTask.setup(tc, nameNode);
@@ -93,8 +96,7 @@ public class TaskTracker implements TaskTrackerInterface, Runnable {
         e.printStackTrace();
       }
     }
-    System.out.println("[TASK TRACKER] Received " + tasksReceived + " new " + jobType
-            + " tasks.");
+    System.out.println("[TASK TRACKER] Received " + tasksReceived + " new " + jobType + " tasks.");
   }
 
   private void askForNewMapTasks() throws RemoteException {
@@ -133,4 +135,11 @@ public class TaskTracker implements TaskTrackerInterface, Runnable {
       }
     }
   }
+
+  @Override
+  public String sayhello() throws RemoteException {
+    return "I'm good, dude";
+
+  }
+
 }

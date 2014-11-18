@@ -67,25 +67,21 @@ public class JobInProgress {
 
     while (i1 < records1 && i2 < records2) {
       if (new String(key1).compareTo(new String(key2)) == -1) {
-        nameNode.write(outputFile, key1);
-        nameNode.write(outputFile, value1);
+        nameNode.write(outputFile, key1, value1);
         is1.read(key1, value1);
       } else {
-        nameNode.write(outputFile, key2);
-        nameNode.write(outputFile, value2);
+        nameNode.write(outputFile, key2, value2);
         is2.read(key2, value2);
       }
     }
 
     while (i1 < records1) {
       is1.read(key1, value1);
-      nameNode.write(outputFile, key1);
-      nameNode.write(outputFile, value1);
+      nameNode.write(outputFile, key1, value1);
     }
     while (i2 < records2) {
       is2.read(key2, value2);
-      nameNode.write(outputFile, key2);
-      nameNode.write(outputFile, value2);
+      nameNode.write(outputFile, key2, value2);
     }
 
     is1.close();

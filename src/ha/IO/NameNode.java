@@ -38,7 +38,9 @@ public class NameNode implements NameNodeInterface {
     if (!filelocations.containsKey(filename)) {
       filelocations.put(filename, new ArrayList<DataNodeInterface>());
     }
-    filelocations.get(filename).add(dataNode);
+    if (!filelocations.get(filename).contains(dataNode)) {
+      filelocations.get(filename).add(dataNode);
+    }
   }
 
   private DataNodeInterface getStubFor(String filename) {
@@ -63,7 +65,7 @@ public class NameNode implements NameNodeInterface {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
     while (!filelocations.containsKey(filename) || filelocations.get(filename).size() < n) {
       if (!dnit.hasNext()) {
-        System.err.println("[NAME NODE] Not enough data nodes to allocate!");
+        System.err.println("[NAME NODE] Not enough data nodes to allocate for file " + filename + "!");
         break;
       }
       
@@ -73,20 +75,20 @@ public class NameNode implements NameNodeInterface {
       }
     }
   }
-  
-  @Override
-  public void write(String filename, byte[] stuff) throws RemoteException {
-    allocateDataNodes(filename, 2);
-    for (DataNodeInterface dataNode : filelocations.get(filename)) {
-      dataNode.write(filename, stuff);
-    }
-  }
 
   @Override
   public void write(String filename, String stuff) throws RemoteException {
     allocateDataNodes(filename, 2);
     for (DataNodeInterface dataNode : filelocations.get(filename)) {
       dataNode.write(filename, stuff);
+    }
+  }
+  
+  @Override
+  public void write(String filename, byte[] key, byte[] value) throws RemoteException {
+    allocateDataNodes(filename, 2);
+    for (DataNodeInterface dataNode : filelocations.get(filename)) {
+      dataNode.write(filename, key, value);
     }
   }
 

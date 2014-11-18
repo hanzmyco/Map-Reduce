@@ -1,6 +1,7 @@
 package ha.mapreduce;
 
 import ha.IO.DistributedInputStream;
+import ha.IO.DistributedOutputStream;
 import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
@@ -18,6 +19,8 @@ public class JobInProgress {
   private int recordsPerSplit = 2;
 
   List<TaskConf> mapTasks;
+
+  int finishedMapTasks = 0;
 
   public JobConf getJobConf() {
     return jc;
@@ -55,38 +58,53 @@ public class JobInProgress {
     }
   }
 
+  /**
+   * Alert this JIP that some map task is finished. Returns whether or not the entire map stage is
+   * finished.
+   */
+  public boolean mapTaskFinished() {
+    finishedMapTasks++;
+    return finishedMapTasks == mapTasks.size();
+  }
+
   public String mergeFiles(String file1, String file2, String outputFile) throws IOException {
     DistributedInputStream is1 = new DistributedInputStream(file1, nameNode), is2 = new DistributedInputStream(
             file2, nameNode);
+    DistributedOutputStream os = new DistributedOutputStream(outputFile, nameNode);
     byte[] key1 = new byte[jc.getKeySize()], key2 = new byte[jc.getKeySize()], value1 = new byte[jc
             .getValueSize()], value2 = new byte[jc.getValueSize()];
     long records1 = nameNode.getFileSize(file1) / jc.getRecordSize(), records2 = nameNode
-            .getFileSize(file2) / jc.getRecordSize(), i1 = 0, i2 = 0;
+            .getFileSize(file2) / jc.getRecordSize(), i1 = 1, i2 = 1;
     is1.read(key1, value1);
     is2.read(key2, value2);
 
     while (i1 < records1 && i2 < records2) {
       if (new String(key1).compareTo(new String(key2)) == -1) {
-        nameNode.write(outputFile, key1, value1);
+        os.write(key1, value1);
         is1.read(key1, value1);
+        i1++;
       } else {
-        nameNode.write(outputFile, key2, value2);
+        os.write(key2, value2);
         is2.read(key2, value2);
+        i2++;
       }
     }
 
     while (i1 < records1) {
       is1.read(key1, value1);
-      nameNode.write(outputFile, key1, value1);
+      os.write(key1, value1);
+      i1++;
     }
     while (i2 < records2) {
       is2.read(key2, value2);
-      nameNode.write(outputFile, key2, value2);
+      os.write(key2, value2);
+      i2++;
     }
 
     is1.close();
     is2.close();
-    
+    os.close();
+
     return outputFile;
   }
 

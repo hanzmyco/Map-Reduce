@@ -1,9 +1,9 @@
 package ha.mapreduce;
 
+import ha.IO.DistributedOutputStream;
 import ha.IO.NameNodeInterface;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -14,9 +14,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class OutputCollector {
-  private String outputFile;
-
-  private NameNodeInterface nameNode;
+  private DistributedOutputStream os;
 
   private int keySize, valueSize;
 
@@ -24,11 +22,10 @@ public class OutputCollector {
 
   public OutputCollector(String outputFile, NameNodeInterface nameNode,
           int keySize, int valueSize) {
-    this.setOutputFile(outputFile);
     this.keySize = keySize;
     this.valueSize = valueSize;
     this.mappings = new TreeMap<String, List<String>>();
-    this.nameNode = nameNode;
+    os = new DistributedOutputStream(outputFile, nameNode);
   }
 
   public void collect(String key, String value) {
@@ -44,18 +41,8 @@ public class OutputCollector {
     }
   }
 
-  public String getOutputFile() {
-    return outputFile;
-  }
-
-  public void setOutputFile(String outputFile) {
-    this.outputFile = outputFile;
-  }
-
   public void write2Disk() throws IOException {
-    new File(outputFile).getParentFile().mkdirs();
-    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile + "local")));
-    nameNode.open(outputFile);
+    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("local")));
 
     try {
       Thread.sleep(500);
@@ -67,7 +54,7 @@ public class OutputCollector {
     for (Map.Entry<String, List<String>> mapping : mappings.entrySet()) {
       for (String value : mapping.getValue()) {
         bw.write(mapping.getKey() + value);
-        nameNode.write(outputFile, mapping.getKey() + value);
+        os.write((mapping.getKey() + value).getBytes());
       }
     }
 

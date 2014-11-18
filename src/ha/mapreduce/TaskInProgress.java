@@ -58,7 +58,7 @@ public class TaskInProgress implements Runnable {
           e.printStackTrace();
         }
         System.out.println("[TASK " + task.getJobID() + "] Finished processing "
-                + task.getCollector().getOutputFile());
+                + task.taskConf.getOutputFilename());
         status = Status.AVAILABLE;
       }
       

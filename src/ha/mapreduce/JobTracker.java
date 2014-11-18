@@ -135,7 +135,17 @@ public class JobTracker implements JobTrackerInterface {
   @Override
   public void markAsDone(TaskConf tc) {
     System.out.println("[JOB TRACKER] Received request to mark task " + tc.getTaskID() + " as done");
-    mapTasks.remove(tc);
+    if (mapTasks.remove(tc) != null) {
+      JobInProgress jip = jobs.get(tc.getJobID());
+      if (jip.mapTaskFinished()) {
+        try {
+          String sortedFilename = jip.getSortedFile();
+        } catch (IOException e) {
+          System.err.println("Can't retrieve sorted file for job " + tc.getJobID());
+          e.printStackTrace();
+        }
+      }
+    }
     reduceTasks.remove(tc);
   }
 

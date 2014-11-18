@@ -2,3 +2,4 @@
 *.txt
 *.map
 *local
+*_sorted_*

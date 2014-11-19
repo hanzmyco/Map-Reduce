@@ -82,14 +82,12 @@ public class JobTracker implements JobTrackerInterface {
 
     return sb.toString();
   }
-
-  @Override
-  public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
-          throws RemoteException {
+  
+  public List<TaskConf> getTasks(InetSocketAddress slave, Map<TaskConf, Boolean> tasks, int tasksAvailable) {
     System.out.println("[JOB TRACKER] Received request for " + tasksAvailable + " map tasks");
     List<TaskConf> temp = new ArrayList<TaskConf>();
 
-    for (Map.Entry<TaskConf, Boolean> task : mapTasks.entrySet()) {
+    for (Map.Entry<TaskConf, Boolean> task : tasks.entrySet()) {
       if (task.getValue()) {
         System.out.println("[JOB TRACKER] Allocating task " + task.getKey().getTaskID()
                 + " from job " + task.getKey().getJobID());
@@ -109,10 +107,15 @@ public class JobTracker implements JobTrackerInterface {
   }
 
   @Override
+  public List<TaskConf> getMapTasks(InetSocketAddress slave, int tasksAvailable)
+          throws RemoteException {
+    return getTasks(slave, mapTasks, tasksAvailable);
+  }
+
+  @Override
   public List<TaskConf> getReduceTasks(InetSocketAddress slave, int tasksAvailable)
           throws RemoteException {
-
-    return new ArrayList<TaskConf>();
+    return getTasks(slave, reduceTasks, tasksAvailable);
   }
 
   @Override

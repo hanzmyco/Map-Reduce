@@ -21,7 +21,7 @@ public class JobInProgress {
   private List<TaskConf> mapTasks, reduceTasks;
 
   private int finishedMapTasks = 0;
-  
+
   private String sortedFilename;
 
   public JobConf getJobConf() {
@@ -38,8 +38,7 @@ public class JobInProgress {
     System.err.println(jc);
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks) {
+  private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks, Class taskClass) {
     try {
       long numBytes = nameNode.getFileSize(inputFile);
       int numSplits = (int) Math.ceil(numBytes * 1.0 / (recordsPerSplit * jc.getRecordSize()));
@@ -47,14 +46,12 @@ public class JobInProgress {
               + (numBytes / jc.getRecordSize()) + " records");
       for (int i = 0; i < numSplits; i++) {
         TaskConf newTask = new TaskConf(inputFile, i * recordsPerSplit, recordsPerSplit,
-                jc.getKeySize(), jc.getValueSize(), (Class<Task>) (Class) jc.getMapperClass(),
-                jc.getJobID(), id++);
+                jc.getKeySize(), jc.getValueSize(), taskClass, jc.getJobID(), id++);
         tasks.add(newTask);
         System.out.println("[JOB " + jc.getJobID() + "] Created Task #" + newTask.getTaskID()
                 + " responsible for records starting at " + newTask.getRecordStart());
       }
-      System.out.println("[JOB " + jc.getJobID() + "] Created " + tasks.size()
-              + " new tasks");
+      System.out.println("[JOB " + jc.getJobID() + "] Created " + tasks.size() + " new tasks");
       return tasks;
     } catch (RemoteException e) {
       e.printStackTrace();
@@ -62,8 +59,9 @@ public class JobInProgress {
     }
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<TaskConf> getMapTasks(int id) {
-    return getTasks(id, jc.getInputFile(), mapTasks);
+    return getTasks(id, jc.getInputFile(), mapTasks, (Class<Task>) (Class) jc.getMapperClass());
   }
 
   /**
@@ -130,8 +128,9 @@ public class JobInProgress {
     sortedFilename = prevFile;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<TaskConf> getReduceTasks(int id) {
-    return getTasks(id, sortedFilename, reduceTasks);
+    return getTasks(id, sortedFilename, reduceTasks, (Class<Task>) (Class) jc.getReducerClass());
   }
 
 }

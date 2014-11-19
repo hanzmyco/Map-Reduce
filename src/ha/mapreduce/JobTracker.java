@@ -46,9 +46,6 @@ public class JobTracker implements JobTrackerInterface {
     for (TaskConf task : jp.getMapTasks(mapTasks.size() + reduceTasks.size())) {
       mapTasks.put(task, true);
     }
-    for (TaskConf task : jp.getReduceTasks()) {
-      reduceTasks.put(task, true);
-    }
 
     jobs.add(jp);
     return jf.getJobID();
@@ -139,7 +136,10 @@ public class JobTracker implements JobTrackerInterface {
       JobInProgress jip = jobs.get(tc.getJobID());
       if (jip.mapTaskFinished()) {
         try {
-          String sortedFilename = jip.getSortedFile();
+          jip.sortMapOutput();
+          for (TaskConf task : jip.getReduceTasks(mapTasks.size() + reduceTasks.size())) {
+            reduceTasks.put(task, true);
+          }
         } catch (IOException e) {
           System.err.println("Can't retrieve sorted file for job " + tc.getJobID());
           e.printStackTrace();

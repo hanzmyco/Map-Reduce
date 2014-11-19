@@ -18,9 +18,11 @@ public class JobInProgress {
 
   private int recordsPerSplit = 2;
 
-  List<TaskConf> mapTasks;
+  private List<TaskConf> mapTasks, reduceTasks;
 
-  int finishedMapTasks = 0;
+  private int finishedMapTasks = 0;
+  
+  private String sortedFilename;
 
   public JobConf getJobConf() {
     return jc;
@@ -29,33 +31,39 @@ public class JobInProgress {
   public JobInProgress(JobConf jc, NameNodeInterface nameNode) throws IOException {
     this.jc = jc;
     this.nameNode = nameNode;
+    mapTasks = new ArrayList<TaskConf>();
+    reduceTasks = new ArrayList<TaskConf>();
 
     System.err.println("[JOB] Received new job conf as such:");
     System.err.println(jc);
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public List<TaskConf> getMapTasks(int id) {
+  private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks) {
     try {
-      long numRecords = nameNode.getFileSize(jc.getInputFile());
-      int numSplits = (int) Math.ceil(numRecords * 1.0 / (recordsPerSplit * jc.getRecordSize()));
-      System.out.println("[JOB " + jc.getJobID() + "] Input file has " + numRecords + " records");
-      mapTasks = new ArrayList<TaskConf>();
+      long numBytes = nameNode.getFileSize(inputFile);
+      int numSplits = (int) Math.ceil(numBytes * 1.0 / (recordsPerSplit * jc.getRecordSize()));
+      System.out.println("[JOB " + jc.getJobID() + "] Input file has "
+              + (numBytes / jc.getRecordSize()) + " records");
       for (int i = 0; i < numSplits; i++) {
-        TaskConf newTask = new TaskConf(jc.getInputFile(), i * recordsPerSplit, recordsPerSplit,
+        TaskConf newTask = new TaskConf(inputFile, i * recordsPerSplit, recordsPerSplit,
                 jc.getKeySize(), jc.getValueSize(), (Class<Task>) (Class) jc.getMapperClass(),
                 jc.getJobID(), id++);
-        mapTasks.add(newTask);
+        tasks.add(newTask);
         System.out.println("[JOB " + jc.getJobID() + "] Created Task #" + newTask.getTaskID()
                 + " responsible for records starting at " + newTask.getRecordStart());
       }
-      System.out.println("[JOB " + jc.getJobID() + "] Created " + mapTasks.size()
-              + " new map tasks");
-      return mapTasks;
+      System.out.println("[JOB " + jc.getJobID() + "] Created " + tasks.size()
+              + " new tasks");
+      return tasks;
     } catch (RemoteException e) {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public List<TaskConf> getMapTasks(int id) {
+    return getTasks(id, jc.getInputFile(), mapTasks);
   }
 
   /**
@@ -112,18 +120,18 @@ public class JobInProgress {
     return outputFile;
   }
 
-  public String getSortedFile() throws IOException {
+  public void sortMapOutput() throws IOException {
     String baseSortedFile = jc.getInputFile() + "_sorted_", prevFile = mergeFiles(mapTasks.get(0)
             .getOutputFilename(), mapTasks.get(1).getOutputFilename(), baseSortedFile + 1 + ".map");
     for (int i = 2; i < mapTasks.size(); i++) {
       prevFile = mergeFiles(prevFile, mapTasks.get(i).getOutputFilename(), baseSortedFile + i
               + ".map");
     }
-    return prevFile;
+    sortedFilename = prevFile;
   }
 
-  public List<TaskConf> getReduceTasks() {
-    return new ArrayList<TaskConf>();
+  public List<TaskConf> getReduceTasks(int id) {
+    return getTasks(id, sortedFilename, reduceTasks);
   }
 
 }

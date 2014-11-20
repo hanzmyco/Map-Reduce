@@ -28,7 +28,7 @@ public class Slave {
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
       Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
-      String dataNodeName = thisMachine.toString() + " data node";
+      String dataNodeName = thisMachine.toString() + " data node";  // this is what datanode name look like, ip:port data node
       new DataNode(dataNodeName, registry2, thisMachine);
       nameNode.register(dataNodeName, thisMachine, true);
       System.out.println("finished datanode registry");

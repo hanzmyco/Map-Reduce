@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Master node
  */
@@ -174,4 +175,5 @@ public class JobTracker implements JobTrackerInterface {
       System.out.println(pairs.getKey() + " = " + pairs.getValue());
     }
   }
+  
 }

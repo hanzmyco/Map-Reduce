@@ -13,4 +13,6 @@ public interface DataNodeInterface extends Remote {
   public void open(String filename) throws RemoteException;
 
   public long getFileSize(String filename) throws RemoteException;
+  
+  public String sayhello()throws RemoteException;
 }

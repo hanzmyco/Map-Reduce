@@ -1,5 +1,6 @@
 package ha.mapreduce;
 
+import ha.IO.DFSHeartbeat;
 import ha.IO.NameNode;
 import ha.IO.NameNodeInterface;
 
@@ -34,6 +35,9 @@ public class Master {
       NameNodeInterface nameNode = new NameNode();
       registry.bind("NameNode",
               (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
+      DFSHeartbeat b1=new DFSHeartbeat(nameNode);
+      new Thread(b1).start();
+      
 
       // create and bind jobtracker to RMI server
       JobTracker jobTracker = new JobTracker(nameNode);

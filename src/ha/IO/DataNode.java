@@ -76,4 +76,9 @@ public class DataNode implements DataNodeInterface {
   public long getFileSize(String filename) throws RemoteException {
     return new File(filename).length();
   }
+
+  @Override
+  public String sayhello() throws RemoteException {
+    return "I'm good, dude";
+  }
 }

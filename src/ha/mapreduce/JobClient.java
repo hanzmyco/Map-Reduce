@@ -84,7 +84,8 @@ public class JobClient {
 
   public static void main(String[] args) throws RemoteException, NotBoundException {
     if (args.length != 2) {
-      System.out.println("USAGE: java ha.mapreduce.JobClient <conf file> <client address>:<client port>");
+      System.out
+              .println("USAGE: java ha.mapreduce.JobClient <conf file> <client address>:<client port>");
       System.exit(0);
     }
 
@@ -99,7 +100,7 @@ public class JobClient {
     System.out.println("[CLIENT] Setting up new job as such:");
     System.out.println(conf);
     JobClient client = new JobClient(conf);
-    
+
     System.out.println("[CLIENT] Submitting input file to DFS");
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
     Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
@@ -108,7 +109,7 @@ public class JobClient {
     NameNodeInterface nameNode = (NameNodeInterface) conf.getRegistry().lookup("NameNode");
     nameNode.register(dataNodeName, thisMachine, false);
     nameNode.put(conf.getInputFile(), dataNodeName);
-    
+
     try {
       client.submitJob(conf);
     } catch (Exception e) {
@@ -119,8 +120,9 @@ public class JobClient {
 
     int port = conf.getRmiServer().getPort();
     try {
-
-      Registry registry = LocateRegistry.getRegistry(port);
+      
+           
+      Registry registry = LocateRegistry.getRegistry(conf.getRmiServer().getHostString(),conf.getRmiServer().getPort());
       JobTrackerInterface stub = (JobTrackerInterface) registry.lookup("JobTracker");
       System.out.println("about to update");
       client.getUpdates(stub);

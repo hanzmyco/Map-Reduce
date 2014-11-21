@@ -21,6 +21,8 @@ public class Slave {
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
 
     try {
+      
+      /*
 
       Registry registry = conf.getRegistry();
 
@@ -32,7 +34,11 @@ public class Slave {
       new DataNode(dataNodeName, registry2, thisMachine);
       nameNode.register(dataNodeName, thisMachine, true);
       System.out.println("finished datanode registry");
-
+      */
+      
+      Registry registry = conf.getRegistry();
+      NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
+      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
       JobTrackerInterface jt = (JobTrackerInterface) registry.lookup("JobTracker");
       TaskTracker tt = new TaskTracker(thisMachine, nameNode, jt, conf.getMappersPerSlave(),
               conf.getReducersPerSlave());

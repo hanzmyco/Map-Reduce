@@ -1,5 +1,10 @@
 package ha.IO;
 
+import ha.mapreduce.JobConf;
+import ha.mapreduce.JobTrackerInterface;
+import ha.mapreduce.TaskTracker;
+import ha.mapreduce.TaskTrackerInterface;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -8,6 +13,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -41,7 +47,7 @@ public class DataNode implements DataNodeInterface {
     }
     return null;
   }
-  
+
   @Override
   public void write(String filename, String stuff) throws RemoteException {
     try {
@@ -54,7 +60,7 @@ public class DataNode implements DataNodeInterface {
       e.printStackTrace();
     }
   }
-  
+
   @Override
   public void write(String filename, byte[] key, byte[] value) throws RemoteException {
     write(filename, new String(key) + new String(value));
@@ -80,5 +86,34 @@ public class DataNode implements DataNodeInterface {
   @Override
   public String sayhello() throws RemoteException {
     return "I'm good, dude";
+  }
+
+  public static void main(String[] args) throws NumberFormatException, IOException {
+    if (args.length != 2) {
+      System.out.println("USAGE: java ha.mapreduce.DataNode <config file> <host:port>");
+      System.exit(0);
+    }
+
+    JobConf conf = new JobConf(args[0]);
+    InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
+
+    try {
+
+      Registry registry = conf.getRegistry();
+
+      // every datanode(slave) has a namenode stub
+      NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
+
+      Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
+      String dataNodeName = thisMachine.toString() + " data node"; // this is what datanode name
+                                                                   // look like, ip:port data node
+      new DataNode(dataNodeName, registry2, thisMachine);
+      nameNode.register(dataNodeName, thisMachine, true);
+      System.out.println("finished datanode registry");
+
+    } catch (Exception e) {
+      System.err.println("[SLAVE] Error getting stub for JobTracker " + e.toString());
+      e.printStackTrace();
+    }
   }
 }

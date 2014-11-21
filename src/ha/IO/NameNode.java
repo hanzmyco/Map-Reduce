@@ -148,10 +148,11 @@ public class NameNode implements NameNodeInterface {
 
       try {
         System.out.println(t.sayhello());
-      } catch (Exception e) {
+      } catch (RemoteException e) {
         // do somehting
         // set the task to do again
         // check if the status is faired last time. two fail means real fails
+        System.err.println("[NameNode ] something wrong with datanode");
         if (tag == true) // last time is good, give him one more chance
         {
           statusList.put(t, false);

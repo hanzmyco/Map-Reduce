@@ -1,5 +1,6 @@
 package ha.mapreduce;
 
+import ha.IO.DataNodeInterface;
 import ha.IO.NameNodeInterface;
 
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Master node
@@ -30,6 +30,8 @@ public class JobTracker implements JobTrackerInterface {
 
   private Map<InetSocketAddress, List<TaskConf>> taskList;
 
+  // private HashMap<TaskTrackerInterface, Boolean> statusList;
+
   public JobTracker(NameNodeInterface nameNode) {
     jobs = new ArrayList<JobInProgress>();
     mapTasks = new LinkedHashMap<TaskConf, Boolean>();
@@ -37,6 +39,7 @@ public class JobTracker implements JobTrackerInterface {
     this.nameNode = nameNode;
     taskTrackers = new HashMap<InetSocketAddress, TaskTrackerInterface>();
     taskList = new HashMap<InetSocketAddress, List<TaskConf>>();
+    // statusList=new HashMap<TaskTrackerInterface, Boolean>();
 
   }
 
@@ -56,9 +59,22 @@ public class JobTracker implements JobTrackerInterface {
     StringBuilder sb = new StringBuilder();
 
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> entry : taskTrackers.entrySet()) {
-      sb.append(entry.getKey() + ":\n");
-      for (TaskStatus taskStatus : entry.getValue().getTaskStatuses()) {
-        sb.append("  " + taskStatus + "\n");
+      
+
+      Boolean judge = false;
+      try {
+        entry.getValue().sayhello();
+      } catch (RemoteException e) {
+        System.out.println("[JOB TRACKER] slave node " + entry.getKey().toString() + " is down");
+        judge = true;
+      
+      }
+
+      if (judge == false) {
+        sb.append(entry.getKey() + ":\n");
+        for (TaskStatus taskStatus : entry.getValue().getTaskStatuses()) {
+          sb.append("  " + taskStatus + "\n");
+        }
       }
     }
 
@@ -70,7 +86,7 @@ public class JobTracker implements JobTrackerInterface {
         assigned++;
     }
     sb.append("\nMap tasks: " + assigned + " assigned, " + unassigned + " unassigned.\n");
-    
+
     assigned = 0;
     unassigned = 0;
     for (Boolean unAssigned : reduceTasks.values()) {
@@ -83,8 +99,9 @@ public class JobTracker implements JobTrackerInterface {
 
     return sb.toString();
   }
-  
-  public List<TaskConf> getTasks(InetSocketAddress slave, Map<TaskConf, Boolean> tasks, int tasksAvailable) {
+
+  public List<TaskConf> getTasks(InetSocketAddress slave, Map<TaskConf, Boolean> tasks,
+          int tasksAvailable) {
     System.out.println("[JOB TRACKER] Received request for " + tasksAvailable + " map tasks");
     List<TaskConf> temp = new ArrayList<TaskConf>();
 
@@ -135,7 +152,8 @@ public class JobTracker implements JobTrackerInterface {
 
   @Override
   public void markAsDone(TaskConf tc) {
-    System.out.println("[JOB TRACKER] Received request to mark task " + tc.getTaskID() + " as done");
+    System.out
+            .println("[JOB TRACKER] Received request to mark task " + tc.getTaskID() + " as done");
     if (mapTasks.remove(tc) != null) {
       JobInProgress jip = jobs.get(tc.getJobID());
       if (jip.mapTaskFinished()) {
@@ -159,7 +177,7 @@ public class JobTracker implements JobTrackerInterface {
 
       try {
         System.out.println(t.sayhello());
-      } catch (Exception e) {
+      } catch (RemoteException e) {
         // do somehting
         // set the task to do again
 
@@ -174,9 +192,10 @@ public class JobTracker implements JobTrackerInterface {
         }
 
       }
-
+      System.out.println("[JOB TRACKER] slave node " + pairs.getKey().toString() + " is down");
+      System.out.println("[JOB TRACKER] reassign all the task in the tasknode to other tasknode");
       System.out.println(pairs.getKey() + " = " + pairs.getValue());
     }
   }
-  
+
 }

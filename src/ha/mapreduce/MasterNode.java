@@ -1,6 +1,5 @@
 package ha.mapreduce;
 
-import ha.IO.DFSHeartbeat;
 import ha.IO.NameNode;
 import ha.IO.NameNodeInterface;
 
@@ -15,7 +14,7 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Master {
+public class MasterNode {
   public static void main(String[] args) throws NumberFormatException, IOException,
           ClassNotFoundException, InterruptedException, AlreadyBoundException, NotBoundException {
     if (args.length != 1) {
@@ -32,15 +31,10 @@ public class Master {
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
 
       // create and bind namenode to RMI server
-      NameNode nameNodeOrigin =new NameNode();
+      NameNode nameNodeOrigin = new NameNode();
       NameNodeInterface nameNode = nameNodeOrigin;
-      registry.bind("NameNode",
-              (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
-      //DFSHeartbeat b1=new DFSHeartbeat(nameNode);
-      //new Thread(b1).start();
+      registry.bind("NameNode", (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
       new Thread(nameNodeOrigin).start();
-      
-      
 
       // create and bind jobtracker to RMI server
       JobTracker jobTracker = new JobTracker(nameNode);

@@ -285,13 +285,6 @@ public class NameNode implements NameNodeInterface, Runnable {
     }
   }
 
-  /*
-   * @Override public void run() { while (true) { try { Thread.sleep(5000); heartBeat();
-   * 
-   * } catch (RemoteException e) {
-   * System.err.println("[Name NODE] something wrong with this datanode !"); //e.printStackTrace();
-   * } catch (InterruptedException e) { System.err.println("[Name Node] Cannot sleep thread!");
-   * e.printStackTrace(); } } }
-   */
+  
 
 }

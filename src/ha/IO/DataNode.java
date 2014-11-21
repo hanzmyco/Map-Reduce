@@ -96,7 +96,7 @@ public class DataNode implements DataNodeInterface {
 
   @Override
   public String sayhello() throws RemoteException {
-    return "This is "+this.getThisMahchine().toString()+", I'm good, dude";
+    return "This is DatNode "+this.getThisMahchine().toString()+", I'm good, dude";
   }
 
   public static void main(String[] args) throws NumberFormatException, IOException {

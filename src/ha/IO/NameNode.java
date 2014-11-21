@@ -31,8 +31,12 @@ public class NameNode implements NameNodeInterface, Runnable {
   private HashMap<DataNodeInterface, List<String>> fileinDataNode;
 
   private Map<DataNodeInterface, InetSocketAddress> dnTrackers;
+  
+  private int replicaPerFile;
+  
+  
 
-  public NameNode() throws RemoteException, NotBoundException {
+  public NameNode(int replicaPerFile) throws RemoteException, NotBoundException {
 
     stubMap = new HashMap<String, DataNodeInterface>();
     writables = new HashMap<DataNodeInterface, Boolean>();
@@ -40,6 +44,7 @@ public class NameNode implements NameNodeInterface, Runnable {
     statusList = new HashMap<DataNodeInterface, Boolean>();
     fileinDataNode = new HashMap<DataNodeInterface, List<String>>();
     dnTrackers = new HashMap<DataNodeInterface, InetSocketAddress>();
+    this.replicaPerFile=replicaPerFile;
 
   }
 
@@ -76,9 +81,9 @@ public class NameNode implements NameNodeInterface, Runnable {
   /**
    * Make sure there are at least N data nodes containing replicas of the file
    */
-  private void allocateDataNodes(String filename, int n) {
+  private void allocateDataNodes(String filename) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
-    while (!filelocations.containsKey(filename) || filelocations.get(filename).size() < n) {
+    while (!filelocations.containsKey(filename) || filelocations.get(filename).size() < replicaPerFile) {
       if (!dnit.hasNext()) {
         System.err.println("[NAME NODE] Not enough data nodes to allocate for file " + filename
                 + "!");
@@ -94,7 +99,7 @@ public class NameNode implements NameNodeInterface, Runnable {
 
   @Override
   public void write(String filename, String stuff) throws RemoteException {
-    allocateDataNodes(filename, 2);
+    allocateDataNodes(filename);
     for (DataNodeInterface dataNode : filelocations.get(filename)) {
       dataNode.write(filename, stuff);
     }
@@ -102,7 +107,7 @@ public class NameNode implements NameNodeInterface, Runnable {
 
   @Override
   public void write(String filename, byte[] key, byte[] value) throws RemoteException {
-    allocateDataNodes(filename, 2);
+    allocateDataNodes(filename);
     for (DataNodeInterface dataNode : filelocations.get(filename)) {
       dataNode.write(filename, key, value);
     }
@@ -110,7 +115,7 @@ public class NameNode implements NameNodeInterface, Runnable {
 
   @Override
   public void open(String filename) throws RemoteException {
-    allocateDataNodes(filename, 2);
+    allocateDataNodes(filename);
     for (DataNodeInterface dataNode : filelocations.get(filename)) {
       dataNode.open(filename);
     }
@@ -166,7 +171,8 @@ public class NameNode implements NameNodeInterface, Runnable {
         } else { // add the file to other place and then delete the node,delete it!!
           ArrayList<String> filetoAdd = (ArrayList) fileinDataNode.get(t);
           for (String ite : filetoAdd) {
-            reWrite2Random(ite);
+            allocateDataNodes(ite);
+
 
             // delete the node from list_filelocations
             List<DataNodeInterface> l_node = filelocations.get(ite);
@@ -230,16 +236,20 @@ public class NameNode implements NameNodeInterface, Runnable {
                 System.out.println("[Name Node] give it one more chance");
                 statusList.put(t, false);
               } else { // add the file to other place and then delete the node,delete it!!
-                System.err.println("[NameNode ] datanode " + dnTrackers.get(t).toString()
+                System.err.println("[Name Node ] datanode " + dnTrackers.get(t).toString()
                         + " is down.");
 
                 if (fileinDataNode.size() != 0) {
                   ArrayList<String> filetoAdd = (ArrayList) fileinDataNode.get(t);
 
                   if (filetoAdd.size() != 0) {
+                    System.out.println("[NAME NODE] reallocate all the file replica in datanode "+dnTrackers.get(t).toString()+" to other datanodes");
 
                     for (String ite : filetoAdd) {
-                      reWrite2Random(ite);
+                      
+                      // allocate another datanode for the file
+                      
+                      allocateDataNodes(ite);
 
                       // delete the node from list_filelocations
                       List<DataNodeInterface> l_node = filelocations.get(ite);

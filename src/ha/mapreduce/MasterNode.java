@@ -31,7 +31,7 @@ public class MasterNode {
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
 
       // create and bind namenode to RMI server
-      NameNode nameNodeOrigin = new NameNode();
+      NameNode nameNodeOrigin = new NameNode(dc.getReplicaPerFile());
       NameNodeInterface nameNode = nameNodeOrigin;
       registry.bind("NameNode", (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
       new Thread(nameNodeOrigin).start();

@@ -167,10 +167,6 @@ public class JobTracker implements JobTrackerInterface, Runnable {
     }
     reduceTasks.remove(tc);
   }
-  
-  
-  
-  
 
   public void heartBeat() throws RemoteException {
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> pairs : taskTrackers.entrySet()) {
@@ -208,8 +204,9 @@ public class JobTracker implements JobTrackerInterface, Runnable {
           TaskTrackerInterface t = pairs.getValue();
 
           try {
-            System.out.println("[Job Tracker] sending heart beat for tasknode ");
-            System.out.println("[Job Tracker] "+t.sayhello());
+            System.out.println("[Job Tracker] sending heart beat for tasknode "
+                    + pairs.getKey().toString());
+            System.out.println("[Job Tracker] " + t.sayhello());
           } catch (RemoteException e) {
             // do somehting
             // set the task to do again
@@ -223,13 +220,13 @@ public class JobTracker implements JobTrackerInterface, Runnable {
                 reduceTasks.put(tf, true);
               }
             }
-            System.out.println("[JOB TRACKER] slave node " + pairs.getKey().toString() + " is down");
+            System.out
+                    .println("[JOB TRACKER] slave node " + pairs.getKey().toString() + " is down");
             System.out
                     .println("[JOB TRACKER] reassign all the task in the tasknode to other tasknode");
 
           }
-          
-          System.out.println(pairs.getKey() + " = " + pairs.getValue());
+
         }
 
       } catch (InterruptedException e) {

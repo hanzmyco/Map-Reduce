@@ -19,7 +19,7 @@ import java.util.Map;
  * Master node
  */
 
-public class JobTracker implements JobTrackerInterface {
+public class JobTracker implements JobTrackerInterface, Runnable {
   private NameNodeInterface nameNode;
 
   private List<JobInProgress> jobs;
@@ -30,8 +30,6 @@ public class JobTracker implements JobTrackerInterface {
 
   private Map<InetSocketAddress, List<TaskConf>> taskList;
 
-  // private HashMap<TaskTrackerInterface, Boolean> statusList;
-
   public JobTracker(NameNodeInterface nameNode) {
     jobs = new ArrayList<JobInProgress>();
     mapTasks = new LinkedHashMap<TaskConf, Boolean>();
@@ -39,7 +37,6 @@ public class JobTracker implements JobTrackerInterface {
     this.nameNode = nameNode;
     taskTrackers = new HashMap<InetSocketAddress, TaskTrackerInterface>();
     taskList = new HashMap<InetSocketAddress, List<TaskConf>>();
-    // statusList=new HashMap<TaskTrackerInterface, Boolean>();
 
   }
 
@@ -59,15 +56,15 @@ public class JobTracker implements JobTrackerInterface {
     StringBuilder sb = new StringBuilder();
 
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> entry : taskTrackers.entrySet()) {
-      
 
       Boolean judge = false;
       try {
+        // also heartbeat first
         entry.getValue().sayhello();
       } catch (RemoteException e) {
         System.out.println("[JOB TRACKER] slave node " + entry.getKey().toString() + " is down");
         judge = true;
-      
+
       }
 
       if (judge == false) {
@@ -170,6 +167,10 @@ public class JobTracker implements JobTrackerInterface {
     }
     reduceTasks.remove(tc);
   }
+  
+  
+  
+  
 
   public void heartBeat() throws RemoteException {
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> pairs : taskTrackers.entrySet()) {
@@ -198,4 +199,43 @@ public class JobTracker implements JobTrackerInterface {
     }
   }
 
+  @Override
+  public void run() {
+    while (true) {
+      try {
+        Thread.sleep(5000);
+        for (Map.Entry<InetSocketAddress, TaskTrackerInterface> pairs : taskTrackers.entrySet()) {
+          TaskTrackerInterface t = pairs.getValue();
+
+          try {
+            System.out.println("[Job Tracker] sending heart beat for tasknode ");
+            System.out.println("[Job Tracker] "+t.sayhello());
+          } catch (RemoteException e) {
+            // do somehting
+            // set the task to do again
+
+            List<TaskConf> tconfList = taskList.get(pairs.getKey());
+            for (TaskConf tf : tconfList) {
+              if (mapTasks.containsKey(tf)) {
+                mapTasks.put(tf, true);
+              }
+              if (reduceTasks.containsKey(tf)) {
+                reduceTasks.put(tf, true);
+              }
+            }
+            System.out.println("[JOB TRACKER] slave node " + pairs.getKey().toString() + " is down");
+            System.out
+                    .println("[JOB TRACKER] reassign all the task in the tasknode to other tasknode");
+
+          }
+          
+          System.out.println(pairs.getKey() + " = " + pairs.getValue());
+        }
+
+      } catch (InterruptedException e) {
+        System.err.println("[Name Node] Cannot sleep thread!");
+        e.printStackTrace();
+      }
+    }
+  }
 }

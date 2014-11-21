@@ -40,6 +40,7 @@ public class MasterNode {
       JobTracker jobTracker = new JobTracker(nameNode);
       registry.bind("JobTracker",
               (JobTrackerInterface) UnicastRemoteObject.exportObject(jobTracker, 0));
+      new Thread(jobTracker).start();
 
       while (true) {
         System.out.println("[MASTER] Waiting for new job on port " + "...");

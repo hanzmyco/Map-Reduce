@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class NameNode implements NameNodeInterface {
+public class NameNode implements NameNodeInterface, Runnable {
 
   // table of slave id, slave ip, key is slave id, value is slave id
 
@@ -30,7 +30,7 @@ public class NameNode implements NameNodeInterface {
 
   private HashMap<DataNodeInterface, List<String>> fileinDataNode;
 
-  // private Registry r;
+  private Map<DataNodeInterface, InetSocketAddress> dnTrackers;
 
   public NameNode() throws RemoteException, NotBoundException {
 
@@ -39,6 +39,7 @@ public class NameNode implements NameNodeInterface {
     filelocations = new HashMap<String, List<DataNodeInterface>>();
     statusList = new HashMap<DataNodeInterface, Boolean>();
     fileinDataNode = new HashMap<DataNodeInterface, List<String>>();
+    dnTrackers = new HashMap<DataNodeInterface, InetSocketAddress>();
 
   }
 
@@ -135,6 +136,11 @@ public class NameNode implements NameNodeInterface {
               (DataNodeInterface) LocateRegistry.getRegistry(rmi_location.getHostString(),
                       rmi_location.getPort()).lookup(rmiName));
       writables.put(stubMap.get(rmiName), writable);
+
+      statusList.put(stubMap.get(rmiName), true);
+
+      dnTrackers.put(stubMap.get(rmiName), rmi_location);
+
     } catch (NotBoundException e) {
       e.printStackTrace();
     }
@@ -145,6 +151,7 @@ public class NameNode implements NameNodeInterface {
     for (Map.Entry<DataNodeInterface, Boolean> pairs : statusList.entrySet()) {
       DataNodeInterface t = pairs.getKey();
       Boolean tag = pairs.getValue();
+      System.out.println("[Name Node] sending heart beat for datanodes");
 
       try {
         System.out.println(t.sayhello());
@@ -152,7 +159,7 @@ public class NameNode implements NameNodeInterface {
         // do somehting
         // set the task to do again
         // check if the status is faired last time. two fail means real fails
-        System.err.println("[NameNode ] something wrong with datanode");
+        System.err.println("[NameNode ] something wrong with this datanode ");
         if (tag == true) // last time is good, give him one more chance
         {
           statusList.put(t, false);
@@ -186,7 +193,6 @@ public class NameNode implements NameNodeInterface {
       }
 
     }
-
   }
 
   private void reWrite2Random(String filename) {
@@ -199,11 +205,93 @@ public class NameNode implements NameNodeInterface {
     return null;
   }
 
-  
-  
-  
-  
-  
-  
-  
+  public void run() {
+    while (true) {
+      try {
+        Thread.sleep(5000);
+        if (statusList.size() != 0) {
+          ArrayList<DataNodeInterface> tobeDelete = new ArrayList<DataNodeInterface>();
+          for (Map.Entry<DataNodeInterface, Boolean> pairs : statusList.entrySet()) {
+            DataNodeInterface t = pairs.getKey();
+            Boolean tag = pairs.getValue();
+
+            try {
+              System.out.println("[Name Node] sending heart beat for datanode "
+                      + dnTrackers.get(t).toString());
+              System.out.println("[Name Node] " + t.sayhello());
+            } catch (RemoteException e) {
+              // do somehting
+              // set the task to do again
+              // check if the status is faired last time. two fail means real fails
+              System.err.println("[NameNode ] something wrong with datanode "
+                      + dnTrackers.get(t).toString());
+              if (tag == true) // last time is good, give him one more chance
+              {
+                System.out.println("[Name Node] give it one more chance");
+                statusList.put(t, false);
+              } else { // add the file to other place and then delete the node,delete it!!
+                System.err.println("[NameNode ] datanode " + dnTrackers.get(t).toString()
+                        + " is down.");
+
+                if (fileinDataNode.size() != 0) {
+                  ArrayList<String> filetoAdd = (ArrayList) fileinDataNode.get(t);
+
+                  if (filetoAdd.size() != 0) {
+
+                    for (String ite : filetoAdd) {
+                      reWrite2Random(ite);
+
+                      // delete the node from list_filelocations
+                      List<DataNodeInterface> l_node = filelocations.get(ite);
+                      l_node.remove(t);
+                      filelocations.put(ite, l_node);
+                    }
+                  }
+                  fileinDataNode.remove(t);
+                }
+
+                // delete the node from stubMap
+                for (Map.Entry<String, DataNodeInterface> stub : stubMap.entrySet()) {
+                  if (stub.getValue() == t) {
+                    stubMap.remove(stub.getKey());
+                    break;
+                  }
+
+                }
+
+                writables.remove(t);
+
+                tobeDelete.add(t);
+
+              }
+
+            }
+
+          }
+          if (tobeDelete.size() != 0) {
+            for (DataNodeInterface t : tobeDelete) {
+              statusList.remove(t);
+
+            }
+
+          }
+
+        }
+
+      } catch (InterruptedException e) {
+        System.err.println("[Name Node] Cannot sleep thread!");
+        e.printStackTrace();
+      }
+    }
+  }
+
+  /*
+   * @Override public void run() { while (true) { try { Thread.sleep(5000); heartBeat();
+   * 
+   * } catch (RemoteException e) {
+   * System.err.println("[Name NODE] something wrong with this datanode !"); //e.printStackTrace();
+   * } catch (InterruptedException e) { System.err.println("[Name Node] Cannot sleep thread!");
+   * e.printStackTrace(); } } }
+   */
+
 }

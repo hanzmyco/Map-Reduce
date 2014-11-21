@@ -32,11 +32,14 @@ public class Master {
       Registry registry = LocateRegistry.createRegistry(dc.getRmiServer().getPort());
 
       // create and bind namenode to RMI server
-      NameNodeInterface nameNode = new NameNode();
+      NameNode nameNodeOrigin =new NameNode();
+      NameNodeInterface nameNode = nameNodeOrigin;
       registry.bind("NameNode",
               (NameNodeInterface) UnicastRemoteObject.exportObject(nameNode, 0));
-      DFSHeartbeat b1=new DFSHeartbeat(nameNode);
-      new Thread(b1).start();
+      //DFSHeartbeat b1=new DFSHeartbeat(nameNode);
+      //new Thread(b1).start();
+      new Thread(nameNodeOrigin).start();
+      
       
 
       // create and bind jobtracker to RMI server

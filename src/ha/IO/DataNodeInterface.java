@@ -1,5 +1,6 @@
 package ha.IO;
 
+import java.net.InetSocketAddress;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -15,4 +16,6 @@ public interface DataNodeInterface extends Remote {
   public long getFileSize(String filename) throws RemoteException;
   
   public String sayhello()throws RemoteException;
+
+  
 }

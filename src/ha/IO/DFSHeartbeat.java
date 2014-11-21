@@ -18,7 +18,7 @@ public class DFSHeartbeat implements Runnable{
     // TODO Auto-generated method stub
     while (true) {
       try {
-        System.out.println("[Name Node] sending heart beat for datanodes!");
+        
         n1.heartBeat();
         Thread.sleep(5000);
       } catch (RemoteException e) {

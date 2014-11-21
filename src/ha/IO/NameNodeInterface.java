@@ -11,4 +11,5 @@ public interface NameNodeInterface extends DataNodeInterface, Remote {
   
   public void heartBeat() throws RemoteException;
   
+  
 }

@@ -18,14 +18,25 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DataNode implements DataNodeInterface {
+  InetSocketAddress thisMahchine;
+
+  public InetSocketAddress getThisMahchine() {
+    return thisMahchine;
+  }
+
+  public void setThisMahchine(InetSocketAddress thisMahchine) {
+    this.thisMahchine = thisMahchine;
+  }
 
   public DataNode(String myName, Registry registry, InetSocketAddress thisMachine) {
+    this.thisMahchine=thisMachine;
     try {
       registry.bind(myName, (DataNodeInterface) UnicastRemoteObject.exportObject(this, 0));
     } catch (RemoteException | AlreadyBoundException e) {
       System.err.println("Cannot bind " + myName);
       e.printStackTrace();
     }
+    
   }
 
   public DataNode() {
@@ -85,7 +96,7 @@ public class DataNode implements DataNodeInterface {
 
   @Override
   public String sayhello() throws RemoteException {
-    return "I'm good, dude";
+    return "This is "+this.getThisMahchine().toString()+", I'm good, dude";
   }
 
   public static void main(String[] args) throws NumberFormatException, IOException {
@@ -101,7 +112,7 @@ public class DataNode implements DataNodeInterface {
 
       Registry registry = conf.getRegistry();
 
-      // every datanode(slave) has a namenode stub
+      // every datanode has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
 
       Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
@@ -109,10 +120,10 @@ public class DataNode implements DataNodeInterface {
                                                                    // look like, ip:port data node
       new DataNode(dataNodeName, registry2, thisMachine);
       nameNode.register(dataNodeName, thisMachine, true);
-      System.out.println("finished datanode registry");
+      System.out.println("[DATA NODE] finished datanode registry");
 
     } catch (Exception e) {
-      System.err.println("[SLAVE] Error getting stub for JobTracker " + e.toString());
+      System.err.println("[DATA NODE] Error getting stub for JobTracker " + e.toString());
       e.printStackTrace();
     }
   }

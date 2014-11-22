@@ -1,6 +1,6 @@
 package ha.mapreduce;
 
-import ha.IO.NameNodeInterface;
+import ha.DFS.NameNodeInterface;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

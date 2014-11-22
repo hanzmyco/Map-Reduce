@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
-import ha.IO.DataNodeInterface;
-import ha.IO.NameNodeInterface;
+import ha.DFS.DataNodeInterface;
+import ha.DFS.NameNodeInterface;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -40,6 +40,14 @@ public class JobTracker implements JobTrackerInterface, Runnable {
 
   }
 
+  /**
+   * it start a job given a client configuration file
+   * 
+   * @param jf
+   * @return job id to client
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public int startJob(JobConf jf) throws IOException, InterruptedException {
     jf.setJobID(jobs.size());
     JobInProgress jp = new JobInProgress(jf, nameNode);
@@ -51,7 +59,9 @@ public class JobTracker implements JobTrackerInterface, Runnable {
     jobs.add(jp);
     return jf.getJobID();
   }
-
+  /**
+   * ask status of each tasktracker using stub
+   */
   public String getStatuses() throws RemoteException {
     StringBuilder sb = new StringBuilder();
 
@@ -96,7 +106,14 @@ public class JobTracker implements JobTrackerInterface, Runnable {
 
     return sb.toString();
   }
-
+  
+  /**
+   * 
+   * @param slave
+   * @param tasks
+   * @param tasksAvailable
+   * @return
+   */
   public List<TaskConf> getTasks(InetSocketAddress slave, Map<TaskConf, Boolean> tasks,
           int tasksAvailable) {
     System.out.println("[JOB TRACKER] Received request for " + tasksAvailable + " map tasks");
@@ -167,6 +184,10 @@ public class JobTracker implements JobTrackerInterface, Runnable {
     }
     reduceTasks.remove(tc);
   }
+  /**
+   * ask the task nodes if they are alive
+   * @throws RemoteException
+   */
 
   public void heartBeat() throws RemoteException {
     for (Map.Entry<InetSocketAddress, TaskTrackerInterface> pairs : taskTrackers.entrySet()) {
@@ -194,7 +215,9 @@ public class JobTracker implements JobTrackerInterface, Runnable {
       System.out.println(pairs.getKey() + " = " + pairs.getValue());
     }
   }
-
+  /**
+   * generate a new thread to ask the task nodes if they are alive
+   */
   @Override
   public void run() {
     while (true) {

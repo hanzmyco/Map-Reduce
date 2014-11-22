@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
-import ha.IO.DistributedInputStream;
-import ha.IO.NameNodeInterface;
+import ha.DFS.DistributedInputStream;
+import ha.DFS.NameNodeInterface;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

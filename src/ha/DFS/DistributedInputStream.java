@@ -1,8 +1,12 @@
-package ha.IO;
+package ha.DFS;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+/**
+ * the IO used by dfs
+ * @author hanz& amos
+ *
+ */
 public class DistributedInputStream extends InputStream {
   long position;
 

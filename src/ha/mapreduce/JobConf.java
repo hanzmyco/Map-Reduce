@@ -1,6 +1,9 @@
 package ha.mapreduce;
 
 import java.io.BufferedReader;
+/**
+ * the class that handle parsing the system and client configuration files
+ */
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;

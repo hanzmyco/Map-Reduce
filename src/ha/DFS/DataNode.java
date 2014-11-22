@@ -1,4 +1,4 @@
-package ha.IO;
+package ha.DFS;
 
 import ha.mapreduce.JobConf;
 import ha.mapreduce.JobTrackerInterface;
@@ -16,7 +16,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-
+/**
+ * datanode that actually stores data in dfs
+ * @author hanz&amos
+ *
+ */
 public class DataNode implements DataNodeInterface {
   InetSocketAddress thisMahchine;
 
@@ -44,6 +48,9 @@ public class DataNode implements DataNodeInterface {
   }
 
   @Override
+  /**
+   * read locally
+   */
   public byte[] read(String filename, long start, int length) throws RemoteException {
     try {
       FileInputStream fr = new FileInputStream(filename);
@@ -58,7 +65,9 @@ public class DataNode implements DataNodeInterface {
     }
     return null;
   }
-
+  /**
+   * write locally
+   */
   @Override
   public void write(String filename, String stuff) throws RemoteException {
     try {
@@ -76,6 +85,9 @@ public class DataNode implements DataNodeInterface {
   public void write(String filename, byte[] key, byte[] value) throws RemoteException {
     write(filename, new String(key) + new String(value));
   }
+  /**
+   *  open locally
+   */
 
   @Override
   public void open(String filename) throws RemoteException {
@@ -93,7 +105,9 @@ public class DataNode implements DataNodeInterface {
   public long getFileSize(String filename) throws RemoteException {
     return new File(filename).length();
   }
-
+  /**
+   * sayhello() is a confirmation for alive to name node
+   */
   @Override
   public String sayhello() throws RemoteException {
     return "This is DatNode "+this.getThisMahchine().toString()+", I'm good, dude";

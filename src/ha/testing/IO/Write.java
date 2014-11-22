@@ -1,6 +1,6 @@
 package ha.testing.IO;
 
-import ha.IO.NameNodeInterface;
+import ha.DFS.NameNodeInterface;
 import ha.mapreduce.JobConf;
 
 import java.io.IOException;

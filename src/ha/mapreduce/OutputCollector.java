@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
-import ha.IO.DistributedOutputStream;
-import ha.IO.NameNodeInterface;
+import ha.DFS.DistributedOutputStream;
+import ha.DFS.NameNodeInterface;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;

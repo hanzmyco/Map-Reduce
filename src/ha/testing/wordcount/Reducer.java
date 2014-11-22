@@ -8,7 +8,10 @@ public class Reducer extends ha.mapreduce.Reducer {
 
   @Override
   public void reduce(String key, Collection<String> values, OutputCollector collector) {
-    collector.collect(key, Integer.toString(values.size()));
+    collector.collect(
+            key,
+            ha.mapreduce.Utils.padLeft(Integer.toString(values.size()), values.iterator().next()
+                    .length()));
   }
 
 }

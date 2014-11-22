@@ -38,6 +38,16 @@ public class JobConf extends Job implements Serializable {
    * Number of mappers running on each slave at one time.
    */
   private Integer mappersPerSlave;
+  
+  private Integer replicaPerFile;
+
+  public Integer getReplicaPerFile() {
+    return replicaPerFile;
+  }
+
+  public void setReplicaPerFile(Integer replicaPerFile) {
+    this.replicaPerFile = replicaPerFile;
+  }
 
   private String inputFile;
 
@@ -73,6 +83,7 @@ public class JobConf extends Job implements Serializable {
     reducerClass = null;
     keySize = 0;
     valueSize = 0;
+    replicaPerFile=0;
 
     parseConf(conf);
   }
@@ -255,6 +266,9 @@ public class JobConf extends Job implements Serializable {
           break;
         case "VALUE_SIZE":
           valueSize = Integer.parseInt(value);
+          break;
+        case "REPLICA_NUM":
+          replicaPerFile=Integer.parseInt(value);
           break;
         default:
           System.err.println("Parameter \"" + getKey(line) + "\" unrecognized.");

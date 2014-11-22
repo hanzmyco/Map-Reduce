@@ -10,7 +10,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Slave {
+public class TaskNode {
   public static void main(String[] args) throws NumberFormatException, IOException {
     if (args.length != 2) {
       System.out.println("USAGE: java ha.mapreduce.Slave <config file> <host:port>");
@@ -21,18 +21,10 @@ public class Slave {
     InetSocketAddress thisMachine = JobConf.getInetSocketAddress(args[1]);
 
     try {
-
+            
       Registry registry = conf.getRegistry();
-
-      // every datanode(slave) has a namenode stub
       NameNodeInterface nameNode = (NameNodeInterface) registry.lookup("NameNode");
-
       Registry registry2 = LocateRegistry.createRegistry(thisMachine.getPort());
-      String dataNodeName = thisMachine.toString() + " data node";
-      new DataNode(dataNodeName, registry2, thisMachine);
-      nameNode.register(dataNodeName, thisMachine, true);
-      System.out.println("finished datanode registry");
-
       JobTrackerInterface jt = (JobTrackerInterface) registry.lookup("JobTracker");
       TaskTracker tt = new TaskTracker(thisMachine, nameNode, jt, conf.getMappersPerSlave(),
               conf.getReducersPerSlave());

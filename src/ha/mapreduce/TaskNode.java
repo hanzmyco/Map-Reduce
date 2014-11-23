@@ -13,7 +13,7 @@ import java.rmi.server.UnicastRemoteObject;
 public class TaskNode {
   public static void main(String[] args) throws NumberFormatException, IOException {
     if (args.length != 2) {
-      System.out.println("USAGE: java ha.mapreduce.Slave <config file> <host:port>");
+      System.out.println("USAGE: java ha.mapreduce.TaskNode <config file> <host:port>");
       System.exit(0);
     }
 

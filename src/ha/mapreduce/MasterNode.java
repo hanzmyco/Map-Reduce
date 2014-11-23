@@ -18,7 +18,7 @@ public class MasterNode {
   public static void main(String[] args) throws NumberFormatException, IOException,
           ClassNotFoundException, InterruptedException, AlreadyBoundException, NotBoundException {
     if (args.length != 1) {
-      System.out.println("USAGE: java ha.mapreduce.Master <conf file> ");
+      System.out.println("USAGE: java ha.mapreduce.MasterNode <conf file> ");
       System.exit(0);
 
     } else {

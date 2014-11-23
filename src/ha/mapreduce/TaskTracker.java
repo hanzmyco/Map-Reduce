@@ -59,7 +59,7 @@ public class TaskTracker implements TaskTrackerInterface, Runnable {
 
   private List<TaskInProgress> availableTasksInProgress(List<TaskInProgress> tasks) {
     List<TaskInProgress> availableTasks = new ArrayList<TaskInProgress>();
-    for (TaskInProgress tip : mappers) {
+    for (TaskInProgress tip : tasks) {
       if (tip.getStatus() == Status.AVAILABLE) {
         if (tip.getTask() != null) {
           try {

@@ -1,9 +1,13 @@
-package ha.IO;
+package ha.DFS;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.rmi.RemoteException;
-
+/**
+ * the IO used by dfs
+ * @author hanz& amos
+ *
+ */
 public class DistributedOutputStream extends OutputStream {
   String outputFilename;
   NameNodeInterface nameNode;

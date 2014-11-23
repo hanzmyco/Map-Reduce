@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
-import ha.IO.DataNode;
-import ha.IO.NameNodeInterface;
+import ha.DFS.DataNode;
+import ha.DFS.NameNodeInterface;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -13,6 +13,11 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+/**
+ * used by user(client) to submit and monitoring jobs
+ * @author hanz&amos
+ *
+ */
 public class JobClient {
 
   private JobConf jconf;
@@ -23,7 +28,7 @@ public class JobClient {
     this.jconf = conf;
   }
 
-  /**
+  /**send the jobconf to master
    * @throws IOException
    * @throws InterruptedException
    * @throws ClassNotFoundException
@@ -68,7 +73,11 @@ public class JobClient {
     }
 
   }
-
+  /**
+   * keep ask for information about submitted job
+   * @param jt
+   * @throws RemoteException
+   */
   private void getUpdates(JobTrackerInterface jt) throws RemoteException {
     while (true) {
       // poll for job status

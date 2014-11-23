@@ -1,7 +1,7 @@
 package ha.mapreduce;
 
-import ha.IO.NameNode;
-import ha.IO.NameNodeInterface;
+import ha.DFS.NameNode;
+import ha.DFS.NameNodeInterface;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,6 +14,11 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * 
+ * @author hanz@amos
+ * This is the main class used by system master and namenode computer, in our framework , we put master node and name node in one machine.
+ */
 public class MasterNode {
   public static void main(String[] args) throws NumberFormatException, IOException,
           ClassNotFoundException, InterruptedException, AlreadyBoundException, NotBoundException {
@@ -22,7 +27,7 @@ public class MasterNode {
       System.exit(0);
 
     } else {
-      // load configuration file
+      // load system configuration file
       JobConf dc = new JobConf(args[0]);
       @SuppressWarnings("resource")
       ServerSocket newJobsSocket = new ServerSocket(dc.getMaster().getPort());
@@ -43,6 +48,7 @@ public class MasterNode {
       new Thread(jobTracker).start();
 
       while (true) {
+        // keep asking for jobs 
         System.out.println("[MASTER] Waiting for new job on port " + "...");
         Socket jobsSocket = newJobsSocket.accept();
         ObjectInputStream newJobsStream = new ObjectInputStream(jobsSocket.getInputStream());

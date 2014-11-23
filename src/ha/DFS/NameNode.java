@@ -1,4 +1,4 @@
-package ha.IO;
+package ha.DFS;
 
 import ha.mapreduce.TaskConf;
 import ha.mapreduce.TaskTrackerInterface;
@@ -12,7 +12,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * dfs center, control all the remote read and write and file registration
+ * @author hanz&amos
+ *
+ */
 public class NameNode implements NameNodeInterface, Runnable {
 
   // table of slave id, slave ip, key is slave id, value is slave id
@@ -47,7 +51,11 @@ public class NameNode implements NameNodeInterface, Runnable {
     this.replicaPerFile=replicaPerFile;
 
   }
-
+  /**
+   * keep the record of file-data nodes storing information
+   * @param filename
+   * @param dataNode
+   */
   private void addToFileLocations(String filename, DataNodeInterface dataNode) {
     if (!filelocations.containsKey(filename)) {
       filelocations.put(filename, new ArrayList<DataNodeInterface>());
@@ -62,7 +70,11 @@ public class NameNode implements NameNodeInterface, Runnable {
       fileinDataNode.get(dataNode).add(filename);
     }
   }
-
+  /**
+   * get the stub of a data node given a filename, return the first stub from the list, the first stub is the one has the origin file, other nodes store only replicas 
+   * @param filename
+   * @return
+   */
   private DataNodeInterface getStubFor(String filename) {
     List<DataNodeInterface> stubs = filelocations.get(filename);
     if (stubs == null) {
@@ -72,14 +84,16 @@ public class NameNode implements NameNodeInterface, Runnable {
       return stubs.get(0);
     }
   }
-
+  /**
+   * remote reading
+   */
   @Override
   public byte[] read(String filename, long start, int length) throws RemoteException {
     return getStubFor(filename).read(filename, start, length);
   }
 
   /**
-   * Make sure there are at least N data nodes containing replicas of the file
+   * Make sure there are at least N data nodes containing replicas of the file, N defined by replica factor
    */
   private void allocateDataNodes(String filename) {
     Iterator<DataNodeInterface> dnit = stubMap.values().iterator();
@@ -96,7 +110,9 @@ public class NameNode implements NameNodeInterface, Runnable {
       }
     }
   }
-
+  /**
+   * remote write
+   */
   @Override
   public void write(String filename, String stuff) throws RemoteException {
     allocateDataNodes(filename);
@@ -104,7 +120,7 @@ public class NameNode implements NameNodeInterface, Runnable {
       dataNode.write(filename, stuff);
     }
   }
-
+ 
   @Override
   public void write(String filename, byte[] key, byte[] value) throws RemoteException {
     allocateDataNodes(filename);
@@ -121,7 +137,7 @@ public class NameNode implements NameNodeInterface, Runnable {
     }
   }
 
-  // what if have existing file
+  // put file given by file name and datanode name
   @Override
   public void put(String filename, String rmiName) throws RemoteException {
     addToFileLocations(filename, stubMap.get(rmiName));
@@ -131,7 +147,9 @@ public class NameNode implements NameNodeInterface, Runnable {
   public long getFileSize(String filename) throws RemoteException {
     return getStubFor(filename).getFileSize(filename);
   }
-
+  /**
+   * data nodes using this fuction for name node stub to register
+   */
   @Override
   public void register(String rmiName, InetSocketAddress rmi_location, boolean writable)
           throws RemoteException {
@@ -151,7 +169,9 @@ public class NameNode implements NameNodeInterface, Runnable {
     }
 
   }
-
+  /**
+   * periodically check the data nodes if they are alive
+   */
   public void heartBeat() throws RemoteException {
     for (Map.Entry<DataNodeInterface, Boolean> pairs : statusList.entrySet()) {
       DataNodeInterface t = pairs.getKey();
@@ -210,7 +230,9 @@ public class NameNode implements NameNodeInterface, Runnable {
     // TODO Auto-generated method stub
     return null;
   }
-
+  /**
+   * using another thread to periodically ask the data noes whether they are alive or not
+   */
   public void run() {
     while (true) {
       try {

@@ -39,16 +39,37 @@ public class JobInProgress {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks, Class taskClass) {
+  private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks, Class taskClass) throws IOException {
     try {
-      long numBytes = nameNode.getFileSize(inputFile);
-      int numSplits = (int) Math.ceil(numBytes * 1.0 / (recordsPerSplit * jc.getRecordSize()));
+      long numBytes = nameNode.getFileSize(inputFile), numRecords = numBytes / jc.getRecordSize(), recordIndex = 0, prevRecordIndex = 0;
+      int numSplits = (int) Math.ceil(numRecords * 1.0 / recordsPerSplit);
       System.out.println("[JOB " + jc.getJobID() + "] Input file has "
               + (numBytes / jc.getRecordSize()) + " records");
-      for (int i = 0; i < numSplits; i++) {
-        DistributedInputStream dis = new DistributedInputStream(inputFile, nameNode);
-        dis.skip(i * recordsPerSplit + recordsPerSplit - 1);
-        TaskConf newTask = new TaskConf(inputFile, i * recordsPerSplit, recordsPerSplit,
+      DistributedInputStream dis = new DistributedInputStream(inputFile, nameNode);
+      byte[] key = new byte[jc.getKeySize()], value = new byte[jc.getValueSize()], tempkey = new byte[jc
+              .getKeySize()], tempvalue = new byte[jc.getValueSize()];
+      for (int i = 0; i < numSplits && recordIndex < numRecords; i++) {
+        prevRecordIndex = recordIndex;
+        int j = 0;
+        while(j < recordsPerSplit && recordIndex < numRecords) {
+          dis.read(key, value);
+          recordIndex++;
+          j++;
+        }
+        dis.read(tempkey, tempvalue);
+        recordIndex++;
+        while(recordIndex < numRecords && tempkey == key) {
+          System.err.println(new String(tempkey) + " and " + new String(key) + " are the same!");
+          dis.read(tempkey, tempvalue);
+          recordIndex++;
+          j++;
+        }
+        if (tempkey == key) {
+          j++;
+        } else {
+          recordIndex--;
+        }
+        TaskConf newTask = new TaskConf(inputFile, (int) prevRecordIndex, j,
                 jc.getKeySize(), jc.getValueSize(), taskClass, jc.getJobID(), id++,
                 nameNode.getFileSize(inputFile));
         tasks.add(newTask);
@@ -65,7 +86,13 @@ public class JobInProgress {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<TaskConf> getMapTasks(int id) {
-    return getTasks(id, jc.getInputFile(), mapTasks, (Class<Task>) (Class) jc.getMapperClass());
+    try {
+      return getTasks(id, jc.getInputFile(), mapTasks, (Class<Task>) (Class) jc.getMapperClass());
+    } catch (IOException e) {
+      System.err.println("Oh no!");
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**

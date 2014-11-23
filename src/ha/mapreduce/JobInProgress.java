@@ -161,7 +161,13 @@ public class JobInProgress {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<TaskConf> getReduceTasks(int id) {
-    return getTasks(id, sortedFilename, reduceTasks, (Class<Task>) (Class) jc.getReducerClass());
+    try {
+      return getTasks(id, sortedFilename, reduceTasks, (Class<Task>) (Class) jc.getReducerClass());
+    } catch (IOException e) {
+      System.err.println("Aww shucks");
+      e.printStackTrace();
+      return null;
+    }
   }
 
 }

@@ -23,6 +23,8 @@ public abstract class Reducer extends Task {
         values.add(currentValue);
       } else { // reduce what we have so far
         if (!previousKey.isEmpty()) {
+          System.out.println("[REDUCER " + taskConf.getTaskID() + "] Calling reduce function on (" + new String(key) + ", " + values + ")");
+
           reduce(previousKey, values, collector);
         }
         
@@ -34,6 +36,8 @@ public abstract class Reducer extends Task {
     
     // done with everything but last key
     if (!previousKey.isEmpty()) {
+      System.out.println("[REDUCER " + taskConf.getTaskID() + "] Calling reduce function on (" + new String(key) + ", " + values + ")");
+
       reduce(previousKey, values, collector);
     }
   }

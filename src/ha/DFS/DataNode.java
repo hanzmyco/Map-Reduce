@@ -22,6 +22,9 @@ import java.rmi.server.UnicastRemoteObject;
  *
  */
 public class DataNode implements DataNodeInterface {
+  /**
+   * The location (host + port) of this data node
+   */
   InetSocketAddress thisMahchine;
 
   public InetSocketAddress getThisMahchine() {
@@ -66,7 +69,7 @@ public class DataNode implements DataNodeInterface {
     return null;
   }
   /**
-   * write locally
+   * write (append) locally
    */
   @Override
   public void write(String filename, String stuff) throws RemoteException {
@@ -86,7 +89,7 @@ public class DataNode implements DataNodeInterface {
     write(filename, new String(key) + new String(value));
   }
   /**
-   *  open locally
+   *  open (overwrite a file) locally
    */
 
   @Override
@@ -101,6 +104,9 @@ public class DataNode implements DataNodeInterface {
     }
   }
 
+  /**
+   * get file size of local file on computer
+   */
   @Override
   public long getFileSize(String filename) throws RemoteException {
     return new File(filename).length();

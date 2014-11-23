@@ -9,9 +9,18 @@ import java.rmi.RemoteException;
  *
  */
 public class DistributedOutputStream extends OutputStream {
+  /**
+   * file we're writing to
+   */
   String outputFilename;
+  /**
+   * name node to write to
+   */
   NameNodeInterface nameNode;
   
+  /**
+   * creates that file if it doesn't already exist; overwrites everything
+   */
   public DistributedOutputStream(String filename, NameNodeInterface nameNode) {
     outputFilename = filename;
     this.nameNode = nameNode;
@@ -35,6 +44,9 @@ public class DistributedOutputStream extends OutputStream {
     nameNode.write(outputFilename, new String(arg0));
   }
   
+  /**
+   * write a key/value pair to DFS
+   */
   public void write(byte[] key, byte[] value) throws IOException {
     write(key);
     write(value);

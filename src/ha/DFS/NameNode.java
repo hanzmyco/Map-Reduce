@@ -23,8 +23,14 @@ public class NameNode implements NameNodeInterface, Runnable {
 
   private HashMap<String, DataNodeInterface> stubMap;
 
+  /**
+   * whether a certain data node is read/write, or write-only
+   */
   private HashMap<DataNodeInterface, Boolean> writables;
 
+  /**
+   * which data nodes each file is located on
+   */
   private HashMap<String, List<DataNodeInterface>> filelocations;
 
   // key is datanode id, value is slave status, 1 is alive, 0 is down
@@ -32,10 +38,19 @@ public class NameNode implements NameNodeInterface, Runnable {
   // down for two times, then get rid of them, write all the files to other place
   private HashMap<DataNodeInterface, Boolean> statusList;
 
+  /**
+   * list of files contained in each data node
+   */
   private HashMap<DataNodeInterface, List<String>> fileinDataNode;
 
+  /**
+   * where the data nodes are
+   */
   private Map<DataNodeInterface, InetSocketAddress> dnTrackers;
   
+  /**
+   * how many times a file is replicated across the DFS
+   */
   private int replicaPerFile;
   
   

@@ -8,10 +8,19 @@ import java.io.InputStream;
  *
  */
 public class DistributedInputStream extends InputStream {
+  /**
+   * where we are in the file
+   */
   long position;
 
+  /**
+   * which file we're reading
+   */
   String filename;
 
+  /**
+   * the name node to read from
+   */
   NameNodeInterface nameNode;
 
   public DistributedInputStream(String filename, NameNodeInterface nameNode) {
@@ -32,6 +41,9 @@ public class DistributedInputStream extends InputStream {
     return arg0.length;
   }
   
+  /**
+   * read consecutively into a key and value array
+   */
   public int read(byte[] key, byte[] value) throws IOException {
     return read(key) + read(value);
   }

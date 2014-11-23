@@ -64,6 +64,7 @@ public class JobInProgress {
           recordIndex++;
           j++;
         }
+        System.err.println("Reached end with " + new String(tempkey) + " and " + new String(key) + "...");
         if (tempkey == key) {
           j++;
         } else {

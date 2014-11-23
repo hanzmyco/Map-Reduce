@@ -3,3 +3,4 @@
 *.map
 *local
 *_sorted_*
+*.out

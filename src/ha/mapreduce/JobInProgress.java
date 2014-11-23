@@ -38,6 +38,7 @@ public class JobInProgress {
     System.err.println(jc);
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private List<TaskConf> getTasks(int id, String inputFile, List<TaskConf> tasks, Class taskClass) {
     try {
       long numBytes = nameNode.getFileSize(inputFile);
@@ -45,8 +46,11 @@ public class JobInProgress {
       System.out.println("[JOB " + jc.getJobID() + "] Input file has "
               + (numBytes / jc.getRecordSize()) + " records");
       for (int i = 0; i < numSplits; i++) {
+        DistributedInputStream dis = new DistributedInputStream(inputFile, nameNode);
+        dis.skip(i * recordsPerSplit + recordsPerSplit - 1);
         TaskConf newTask = new TaskConf(inputFile, i * recordsPerSplit, recordsPerSplit,
-                jc.getKeySize(), jc.getValueSize(), taskClass, jc.getJobID(), id++);
+                jc.getKeySize(), jc.getValueSize(), taskClass, jc.getJobID(), id++,
+                nameNode.getFileSize(inputFile));
         tasks.add(newTask);
         System.out.println("[JOB " + jc.getJobID() + "] Created Task #" + newTask.getTaskID()
                 + " responsible for records starting at " + newTask.getRecordStart());

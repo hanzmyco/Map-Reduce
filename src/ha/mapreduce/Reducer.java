@@ -14,7 +14,7 @@ public abstract class Reducer extends Task {
     String previousKey = "";
     List<String> values = new ArrayList<String>();
     isr.skip(taskConf.getStart());
-    for (int i = 0; i < taskConf.getRecordCount(); i++) {
+    for (int i = 0; i < taskConf.getEndingRecord(); i++) {
       if (isr.read(key) == -1) break;
       if (isr.read(value) == -1) break;
       String currentKey = new String(key), currentValue = new String(value);

@@ -115,7 +115,7 @@ public class DataNode implements DataNodeInterface {
 
   public static void main(String[] args) throws NumberFormatException, IOException {
     if (args.length != 2) {
-      System.out.println("USAGE: java ha.mapreduce.DataNode <config file> <host:port>");
+      System.out.println("USAGE: java ha.DFS.DataNode <config file> <host:port>");
       System.exit(0);
     }
 

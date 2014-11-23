@@ -45,10 +45,11 @@ public class JobInProgress {
       int numSplits = (int) Math.ceil(numRecords * 1.0 / recordsPerSplit);
       System.out.println("[JOB " + jc.getJobID() + "] Input file has "
               + (numBytes / jc.getRecordSize()) + " records");
-      DistributedInputStream dis = new DistributedInputStream(inputFile, nameNode);
       byte[] key = new byte[jc.getKeySize()], value = new byte[jc.getValueSize()], tempkey = new byte[jc
               .getKeySize()], tempvalue = new byte[jc.getValueSize()];
       for (int i = 0; i < numSplits && recordIndex < numRecords; i++) {
+        DistributedInputStream dis = new DistributedInputStream(inputFile, nameNode);
+        dis.skip(recordIndex * jc.getRecordSize());
         prevRecordIndex = recordIndex;
         int j = 0;
         while(j < recordsPerSplit && recordIndex < numRecords) {
@@ -58,14 +59,14 @@ public class JobInProgress {
         }
         dis.read(tempkey, tempvalue);
         recordIndex++;
-        while(recordIndex < numRecords && tempkey == key) {
+        while(recordIndex < numRecords && new String(tempkey).equals(new String(key))) {
           System.err.println(new String(tempkey) + " and " + new String(key) + " are the same!");
           dis.read(tempkey, tempvalue);
           recordIndex++;
           j++;
         }
-        System.err.println("Reached end with " + new String(tempkey) + " and " + new String(key) + "...");
-        if (tempkey == key) {
+        System.err.println("Reached end (at record #" + recordIndex + ") with " + new String(tempkey) + " and " + new String(key) + "...");
+        if (new String(tempkey).equals(new String(key))) {
           j++;
         } else {
           recordIndex--;
@@ -76,6 +77,7 @@ public class JobInProgress {
         tasks.add(newTask);
         System.out.println("[JOB " + jc.getJobID() + "] Created Task #" + newTask.getTaskID()
                 + " responsible for records starting at " + newTask.getRecordStart());
+        dis.close();
       }
       System.out.println("[JOB " + jc.getJobID() + "] Created " + tasks.size() + " new tasks");
       return tasks;
